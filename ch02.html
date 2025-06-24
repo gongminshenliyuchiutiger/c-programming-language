@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二章：有if指令的程式</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --header-color: #343a40;
+            --border-color: #dee2e6;
+            --sidebar-width: 300px;
+        }
+
+        /* General Body Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background-color: var(--header-color);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            white-space: nowrap; 
+            color: #ffffff;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .sidebar-nav-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .back-button {
+            display: block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #toc li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        #toc > ul > .chapter > a {
+            font-weight: 700;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        #toc li a:hover {
+            background-color: #e2e6ea;
+        }
+
+        #toc li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 5px solid #0056b3;
+            padding-left: 15px;
+        }
+        
+        #toc ul ul { /* Nested list for sections */
+            padding-left: 20px;
+            background-color: #fff;
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 1px 50px 50px 50px;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .content-section {
+            padding-top: 20px;
+            margin-top: -20px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5em;
+            margin-bottom: 1.2em;
+        }
+        h1 { font-size: 2.5em; margin-top: 1em; text-align: center; border-bottom-width: 3px;}
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; border-bottom: 1px dashed #ccc; }
+
+        p, ol, ul {
+            margin-bottom: 1.2em;
+        }
+
+        .diagram-container {
+            max-width: 100%;
+            margin: 25px auto;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+            box-sizing: border-box;
+        }
+        
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre[class*="language-"] {
+            border-radius: 8px;
+            padding: 1.5em !important;
+            margin: 0 !important;
+            line-height: 1.6;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 1;
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--primary-color);
+        }
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        /* Execution example style */
+        .execution-example {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-left: 5px solid #fd971f;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer Style */
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <h3>成為程式神不再只是夢想</h3>
+                <p>使用C語言</p>
+            </header>
+            <div class="sidebar-nav-actions">
+                <a href="index.html" class="back-button">返回主目錄</a>
+            </div>
+            <nav id="toc">
+                <!-- Table of Contents will be generated by JavaScript -->
+            </nav>
+        </aside>
+        <main class="content">
+            <div id="content-area">
+                 <!-- Content will be injected by JavaScript -->
+            </div>
+            <footer>
+                Copyright &copy; Liyuchiutiger Gongminshen
+            </footer>
+        </main>
+    </div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Elements ---
+        const tocContainer = document.getElementById('toc');
+        const contentArea = document.getElementById('content-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // --- Table of Contents Data ---
+        const tableOfContents = [
+            { id: 'ch2-title', title: '第二章：有if指令的程式', isChapter: true },
+            { id: 'ch2-sec1', title: '2.1 簡單的if指令用法' },
+            { id: 'ch2-sec2', title: '2.2 有連續if指令的程式' },
+            { id: 'ch2-sec3', title: '2.3 使用switch case指令的程式' },
+            { id: 'ch2-sec4', title: '2.4 if指令的流程圖' },
+            { id: 'ch2-exercise', title: '練習二與解答' },
+        ];
+
+        // --- Dynamic SVG Generation ---
+        function generateDiagram(elements) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const PADDING = 20;
+            const svgElements = [];
+
+            const updateBounds = (x, y, w = 0, h = 0) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + w);
+                maxY = Math.max(maxY, y + h);
+            };
+            
+            elements.forEach(el => {
+                let svgString = '';
+                switch (el.type) {
+                    case 'rect':
+                        svgString = `<g><rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="4" ry="4" fill="#e3f2fd" stroke="#0d47a1" stroke-width="1.5" /><text x="${el.x + el.w / 2}" y="${el.y + el.h / 2}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.x, el.y, el.w, el.h);
+                        break;
+                    case 'diamond':
+                        const w2 = el.w / 2, h2 = el.h / 2;
+                        const points = `${el.cx},${el.cy - h2} ${el.cx + w2},${el.cy} ${el.cx},${el.cy + h2} ${el.cx - w2},${el.cy}`;
+                        svgString = `<g><polygon points="${points}" fill="#fffde7" stroke="#f57f17" stroke-width="1.5" /><text x="${el.cx}" y="${el.cy}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.cx - w2, el.cy - h2, el.w, el.h);
+                        break;
+                    case 'line':
+                        svgString = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)" />`;
+                        updateBounds(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x1-el.x2), Math.abs(el.y1-el.y2));
+                        break;
+                    case 'label':
+                        svgString = `<text x="${el.x}" y="${el.y}" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#555" text-anchor="middle">${el.text}</text>`;
+                        break;
+                }
+                svgElements.push(svgString);
+            });
+
+            const finalWidth = (maxX - minX) + 2 * PADDING;
+            const finalHeight = (maxY - minY) + 2 * PADDING;
+            const viewBox = `${minX - PADDING} ${minY - PADDING} ${finalWidth} ${finalHeight}`;
+            
+            const defs = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs>`;
+            
+            return `<div class="diagram-container"><svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${defs}${svgElements.join('')}</svg></div>`;
+        }
+
+        // --- Page Content Data ---
+        const pageContent = `
+            <section id="ch2-title" class="content-section">
+                <h1>第二章：有if指令的程式</h1>
+                <p>我們日常生活中，常會收到「如果怎樣怎樣，你就該如何如何。」的指令。比方說，你問路，回答的話極可能是：「如果你碰到紅綠燈的交通號誌，就向右轉。」你小時候上學，媽媽會叮嚀你：「如果天下雨，就打傘。」</p>
+                <p>這種情形，在我們寫程式的時候也會發生，含有「如果」的指令，就是含有if的指令，這種指令可由下圖表示：</p>
+                ${generateDiagram([
+                    { type: 'diamond', cx: 150, cy: 60, w: 160, h: 60, text: 'XX條件是否成立?' },
+                    { type: 'line', x1: 230, y1: 60, x2: 260, y2: 60 },
+                    { type: 'label', x: 245, y: 50, text: 'Yes' },
+                    { type: 'rect', x: 260, y: 42.5, w: 80, h: 35, text: '程式A' },
+                    { type: 'line', x1: 150, y1: 90, x2: 150, y2: 140 },
+                    { type: 'label', x: 135, y: 115, text: 'No' },
+                    { type: 'rect', x: 110, y: 140, w: 80, h: 35, text: '程式B' },
+                    { type: 'line', x1: 300, y1: 77.5, x2: 300, y2: 195 },
+                    { type: 'line', x1: 150, y1: 175, x2: 150, y2: 195 },
+                    { type: 'line', x1: 150, y1: 195, x2: 300, y2: 195, noArrow: true },
+                    { type: 'line', x1: 225, y1: 195, x2: 225, y2: 215 }
+                ])}
+            </section>
+
+            <section id="ch2-sec1" class="content-section">
+                <h2>2.1 簡單的if指令用法</h2>
+                <h3>例題2.1-1 兩個數字中選大的那一個</h3>
+                <p>我們讀入兩個數x和y，我們要從x和y中選一個大的數字。流程圖如下：</p>
+                 ${generateDiagram([
+                    { type: 'rect', x: 80, y: 10, w: 140, h: 35, text: '讀入 x和y' },
+                    { type: 'line', x1: 150, y1: 45, x2: 150, y2: 65 },
+                    { type: 'diamond', cx: 150, cy: 100, w: 120, h: 70, text: 'x > y ?' },
+                    { type: 'line', x1: 210, y1: 100, x2: 260, y2: 100 },
+                    { type: 'label', x: 235, y: 90, text: 'Yes' },
+                    { type: 'rect', x: 260, y: 82.5, w: 80, h: 35, text: 'z = x' },
+                    { type: 'line', x1: 150, y1: 135, x2: 150, y2: 175 },
+                    { type: 'label', x: 135, y: 160, text: 'No' },
+                    { type: 'rect', x: 110, y: 175, w: 80, h: 35, text: 'z = y' },
+                    { type: 'line', x1: 300, y1: 117.5, x2: 300, y2: 250, noArrow: true },
+                    { type: 'line', x1: 150, y1: 210, x2: 150, y2: 250, noArrow: true },
+                    { type: 'line', x1: 150, y1: 250, x2: 300, y2: 250, noArrow: true },
+                    { type: 'line', x1: 225, y1: 250, x2: 225, y2: 270 },
+                    { type: 'rect', x: 185, y: 270, w: 80, h: 35, text: '列印 z' }
+                 ])}
+                
+                <h4>程式 2.1-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int x, y, z;
+    printf("Enter x: ");
+    scanf("%d", &x);
+    printf("Enter y: ");
+    scanf("%d", &y);
+
+    if (x > y) { /* x值較大 */
+        z = x; /* 將x的值存入z中 */
+    } else { /* y值較大或相等 */
+        z = y; /* 將y的值存入z中 */
+    }
+    printf("The larger number is %d.\\n", z);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter x: 3
+Enter y: 5
+The larger number is 5.</div>
+                <h4>解釋</h4>
+                <ul>
+                    <li><b>if (x > y) { ... }</b>: 這是一個if指令，用法為檢查括號內的條件式是否成立，若成立，則執行接著大括號{ }中的指令。</li>
+                    <li><b>else { ... }</b>: else需要與if指令合用，代表的意義是當if後面的條件式不成立時，則執行else後面大括號{ }中的指令。</li>
+                </ul>
+
+                <h3>例題2.1-3 將負數轉成正數</h3>
+                <p>我們讀入一個數字，如果是負數，就將它轉成正數。這個程式的流程圖如下所示。</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 100, y: 10, w: 100, h: 35, text: '讀入 x' },
+                    { type: 'line', x1: 150, y1: 45, x2: 150, y2: 65 },
+                    { type: 'diamond', cx: 150, cy: 100, w: 120, h: 70, text: 'x < 0?' },
+                    { type: 'line', x1: 210, y1: 100, x2: 260, y2: 100 },
+                    { type: 'label', x: 235, y: 90, text: 'Yes' },
+                    { type: 'rect', x: 260, y: 82.5, w: 80, h: 35, text: 'x = -x' },
+                    { type: 'line', x1: 150, y1: 135, x2: 150, y2: 195, noArrow: true },
+                    { type: 'label', x: 135, y: 160, text: 'No' },
+                    { type: 'line', x1: 300, y1: 117.5, x2: 300, y2: 195, noArrow: true },
+                    { type: 'line', x1: 150, y1: 195, x2: 300, y2: 195, noArrow: true },
+                    { type: 'line', x1: 225, y1: 195, x2: 225, y2: 215 },
+                    { type: 'rect', x: 185, y: 215, w: 80, h: 35, text: '列印 x' }
+                ])}
+                
+                <h4>程式 2.1-3</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int x;
+    printf("Enter x: ");
+    scanf("%d", &x);
+
+    if (x < 0) { /* 如果x小於0 */
+        x = -x; /* 將x乘以-1，使其轉為正數 */
+    }
+    
+    printf("The absolute value is %d.\\n", x);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter x: -10
+The absolute value is 10.</div>
+            </section>
+            
+            <section id="ch2-sec2" class="content-section">
+                <h2>2.2 有連續if指令的程式</h2>
+                <h3>例題2.2-1 分級費用</h3>
+                <p>假設我們有一個制度，根據用水的多少收費。規定如下：</p>
+                <ul>
+                    <li>(1) 用水量少於30度者，收費50元</li>
+                    <li>(2) 用水量在30度與60度之間者，收費70元</li>
+                    <li>(3) 用水量在60度以上者，收費100元</li>
+                </ul>
+                ${generateDiagram([
+                    { type: 'rect', x: 90, y: 10, w: 140, h: 35, text: '讀入 x (用水量)' },
+                    { type: 'line', x1: 160, y1: 45, x2: 160, y2: 65 },
+                    { type: 'diamond', cx: 160, cy: 100, w: 120, h: 70, text: 'x < 30?' },
+                    { type: 'line', x1: 220, y1: 100, x2: 260, y2: 100 },
+                    { type: 'label', x: 240, y: 90, text: 'Yes' },
+                    { type: 'rect', x: 260, y: 82.5, w: 80, h: 35, text: 'y = 50' },
+                    { type: 'line', x1: 160, y1: 135, x2: 160, y2: 155 },
+                    { type: 'label', x: 145, y: 150, text: 'No' },
+                    { type: 'diamond', cx: 160, cy: 190, w: 120, h: 70, text: 'x < 60?' },
+                    { type: 'line', x1: 220, y1: 190, x2: 260, y2: 190 },
+                    { type: 'label', x: 240, y: 180, text: 'Yes' },
+                    { type: 'rect', x: 260, y: 172.5, w: 80, h: 35, text: 'y = 70' },
+                    { type: 'line', x1: 160, y1: 225, x2: 60, y2: 225, noArrow: true },
+                    { type: 'line', x1: 60, y1: 225, x2: 60, y2: 207.5 },
+                    { type: 'label', x: 130, y: 215, text: 'No' },
+                    { type: 'rect', x: 20, y: 172.5, w: 80, h: 35, text: 'y = 100' },
+                    { type: 'line', x1: 300, y1: 117.5, x2: 300, y2: 260, noArrow: true },
+                    { type: 'line', x1: 300, y1: 207.5, x2: 300, y2: 260, noArrow: true },
+                    { type: 'line', x1: 60, y1: 207.5, x2: 60, y2: 260, noArrow: true },
+                    { type: 'line', x1: 60, y1: 260, x2: 300, y2: 260, noArrow: true },
+                    { type: 'line', x1: 180, y1: 260, x2: 180, y2: 275 },
+                    { type: 'rect', x: 140, y: 275, w: 80, h: 35, text: '列印 y' }
+                ])}
+
+                <h4>程式 2.2-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int x; /* 用水量 */
+    int y; /* 費用 */
+    printf("Enter water usage: ");
+    scanf("%d", &x);
+
+    if (x < 30) { /* 用水量小於30度 */
+        y = 50; /* 費用設為50 */
+    } else if (x < 60) { /* 用水量大於等於30度但小於60度 */
+        y = 70; /* 費用設為70 */
+    } else { /* 用水量大於等於60度 */
+        y = 100; /* 費用設為100 */
+    }
+    printf("The fee is %d.\\n", y);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter water usage: 50
+The fee is 70.</div>
+            </section>
+            
+            <section id="ch2-sec3" class="content-section">
+                <h2>2.3 使用switch case指令的程式</h2>
+                <h3>例題2.3-1 根據會員等級決定折扣</h3>
+                <p>假設我們有一個結帳制度，根據會員的等級，給予不同的折扣。規定如下：</p>
+                <ul>
+                    <li>(1) A級會員，打8折</li>
+                    <li>(2) B級會員，打9折</li>
+                    <li>(3) 非會員，無折扣</li>
+                </ul>
+                ${generateDiagram([
+                    { type: 'rect', x: 50, y: 10, w: 250, h: 35, text: '讀入membership, total' },
+                    { type: 'line', x1: 175, y1: 45, x2: 175, y2: 65 },
+                    { type: 'diamond', cx: 175, cy: 100, w: 160, h: 70, text: 'A級會員?' },
+                    { type: 'line', x1: 255, y1: 100, x2: 310, y2: 100 },
+                    { type: 'label', x: 280, y: 90, text: 'Yes' },
+                    { type: 'rect', x: 310, y: 82.5, w: 120, h: 35, text: 'discount = 0.8' },
+                    { type: 'line', x1: 175, y1: 135, x2: 175, y2: 155 },
+                    { type: 'label', x: 160, y: 150, text: 'No' },
+                    { type: 'diamond', cx: 175, cy: 190, w: 160, h: 70, text: 'B級會員?' },
+                    { type: 'line', x1: 255, y1: 190, x2: 310, y2: 190 },
+                    { type: 'label', x: 280, y: 180, text: 'Yes' },
+                    { type: 'rect', x: 310, y: 172.5, w: 120, h: 35, text: 'discount = 0.9' },
+                    { type: 'line', x1: 175, y1: 225, x2: 75, y2: 225, noArrow: true },
+                    { type: 'line', x1: 75, y1: 225, x2: 75, y2: 207.5 },
+                    { type: 'label', x: 135, y: 215, text: 'No' },
+                    { type: 'rect', x: 15, y: 172.5, w: 120, h: 35, text: 'discount = 1.0' },
+                    { type: 'line', x1: 370, y1: 117.5, x2: 370, y2: 260, noArrow: true },
+                    { type: 'line', x1: 370, y1: 207.5, x2: 370, y2: 260, noArrow: true },
+                    { type: 'line', x1: 75, y1: 207.5, x2: 75, y2: 260, noArrow: true },
+                    { type: 'line', x1: 75, y1: 260, x2: 370, y2: 260, noArrow: true },
+                    { type: 'line', x1: 222.5, y1: 260, x2: 222.5, y2: 280 },
+                    { type: 'rect', x: 142.5, y: 280, w: 160, h: 35, text: 'total = total*discount' },
+                    { type: 'line', x1: 222.5, y1: 315, x2: 222.5, y2: 335 },
+                    { type: 'rect', x: 142.5, y: 335, w: 160, h: 35, text: '列印 total' }
+                ])}
+
+                <h4>程式 2.3-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char membership;
+    float total, discount;
+    printf("Enter membership (A/B/N): ");
+    scanf(" %c", &membership);
+    printf("Enter total: ");
+    scanf("%f", &total);
+    
+    switch(membership) {
+        case 'a':
+        case 'A': /* A級會員 */
+            discount = 0.8; /* 8折折扣 */
+            break;
+        case 'b':
+        case 'B': /* B級會員 */
+            discount = 0.9; /* 9折折扣 */
+            break;
+        default:  /* 一般會員 */
+            discount = 1.0; /* 沒有折扣 */
+            break;
+    }
+    
+    total = total * discount;
+    printf("Final total = %.2f\\n", total);
+    
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter membership (A/B/N): b
+Enter total: 50
+Final total = 45.00</div>
+                <h4>解釋</h4>
+                <ul>
+                    <li><b>switch(membership)</b>: 代表我們要用switch指令來檢查membership裡的值。</li>
+                    <li><b>case 'A':</b>: 當membership的值為'A'時，執行後面的程式碼。注意這裡的大小寫'a'和'A'都會執行相同的程式碼，因為'case a:'後面沒有'break'。</li>
+                    <li><b>break;</b>: 跳出switch的範圍。如果沒有break，程式會繼續執行下一個case的內容，這稱為"fall-through"。</li>
+                    <li><b>default:</b>: 當所有case都不符合時，執行default區塊的程式碼。</li>
+                </ul>
+            </section>
+            
+            <section id="ch2-sec4" class="content-section">
+                 <h2>2.4 if指令的流程圖</h2>
+                <p>這一節我們將介紹如何從有If指令的程式碼中來畫出對應的流程圖。這是一個尋找三個相異數字a, b, c中最大值的程式。</p>
+                <h4>程式 2.4-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a, b, c;
+    printf("The values of a, b and c shall be different.\\n");
+    printf("Please enter a: "); scanf("%d", &a);
+    printf("Please enter b: "); scanf("%d", &b);
+    printf("Please enter c: "); scanf("%d", &c);
+    
+    if (b > c) {
+        if (a > b) {
+            printf("a is the largest.\\n");
+        } else {
+            printf("b is the largest.\\n");
+        }
+    } else {
+        if (a > c) {
+            printf("a is the largest.\\n");
+        } else {
+            printf("c is the largest.\\n");
+        }
+    }
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">The values of a, b and c shall be different.
+Please enter a: 1
+Please enter b: 2
+Please enter c: 3
+c is the largest.</div>
+                <h4>解釋與流程圖</h4>
+                <p>這段程式碼的邏輯結構可以用一個巢狀的流程圖來表示，先比較 b 和 c，再根據結果去比較 a 和它們之中較大的一個。</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 150, y: 10, w: 180, h: 35, text: '輸入 a,b,c 的值' },
+                    { type: 'line', x1: 240, y1: 45, x2: 240, y2: 75 },
+                    { type: 'diamond', cx: 240, cy: 110, w: 120, h: 70, text: 'b > c?' },
+                    { type: 'line', x1: 300, y1: 110, x2: 390, y2: 110 },
+                    { type: 'label', x: 345, y: 100, text: 'Yes' },
+                    { type: 'diamond', cx: 390, cy: 110, w: 120, h: 70, text: 'a > b?' },
+                    { type: 'line', x1: 450, y1: 110, x2: 490, y2: 110 },
+                    { type: 'label', x: 470, y: 100, text: 'Yes' },
+                    { type: 'rect', x: 490, y: 92.5, w: 120, h: 35, text: '列印a是最大值' },
+                    { type: 'line', x1: 390, y1: 145, x2: 390, y2: 165 },
+                    { type: 'label', x: 375, y: 160, text: 'No' },
+                    { type: 'rect', x: 330, y: 165, w: 120, h: 35, text: '列印b是最大值' },
+                    { type: 'line', x1: 240, y1: 145, x2: 180, y2: 145, noArrow: true },
+                    { type: 'line', x1: 180, y1: 145, x2: 180, y2: 165 },
+                    { type: 'label', x: 200, y: 135, text: 'No' },
+                    { type: 'diamond', cx: 180, cy: 200, w: 120, h: 70, text: 'a > c?' },
+                    { type: 'line', x1: 120, y1: 200, x2: 50, y2: 200 },
+                    { type: 'label', x: 85, y: 190, text: 'No' },
+                    { type: 'rect', x: -70, y: 182.5, w: 120, h: 35, text: '列印c是最大值' },
+                    { type: 'line', x1: 180, y1: 235, x2: 180, y2: 255 },
+                    { type: 'label', x: 165, y: 250, text: 'Yes' },
+                    { type: 'rect', x: 120, y: 255, w: 120, h: 35, text: '列印a是最大值' },
+                    { type: 'line', x1: 550, y1: 127.5, x2: 550, y2: 300, noArrow: true },
+                    { type: 'line', x1: 390, y1: 200, x2: 390, y2: 300, noArrow: true },
+                    { type: 'line', x1: -10, y1: 200, x2: -10, y2: 300, noArrow: true },
+                    { type: 'line', x1: 180, y1: 290, x2: 180, y2: 300, noArrow: true },
+                    { type: 'line', x1: -10, y1: 300, x2: 550, y2: 300, noArrow: true },
+                    { type: 'line', x1: 270, y1: 300, x2: 270, y2: 320 },
+                    { type: 'rect', x: 220, y: 320, w: 100, h: 35, text: '程式結束' }
+                ])}
+            </section>
+            
+            <section id="ch2-exercise" class="content-section">
+                <h2>練習二與解答</h2>
+                <h4>練習：所得稅計算</h4>
+                <p>請根據以下所得稅級距規則，撰寫一支程式。程式需要接收使用者輸入的所得額，並計算出對應的應繳稅額。計算公式為：<code>應繳稅額 = 所得額 * 稅率 - 累進差額</code>。</p>
+                <ul>
+                    <li>所得淨額超過 4,090,000元：稅率 40%，累進差額 721,100元</li>
+                    <li>2,180,001 至 4,090,000元：稅率 30%，累進差額 312,100元</li>
+                    <li>1,090,001 至 2,180,000元：稅率 21%，累進差額 115,900元</li>
+                    <li>410,001 至 1,090,000元：稅率 13%，累進差額 28,700元</li>
+                    <li>0 至 410,000元：稅率 6%，累進差額 0元</li>
+                </ul>
+                <p><b>流程圖：</b></p>
+                ${generateDiagram([
+                    { type: 'rect', x: 200, y: 10, w: 180, h: 35, text: '讀入 income' },
+                    { type: 'line', x1: 290, y1: 45, x2: 290, y2: 65 },
+                    
+                    { type: 'diamond', cx: 290, cy: 100, w: 200, h: 60, text: 'income > 4090000?' },
+                    { type: 'line', x1: 390, y1: 100, x2: 450, y2: 100 },
+                    { type: 'label', x: 420, y: 90, text: 'Yes' },
+                    { type: 'rect', x: 450, y: 82.5, w: 230, h: 35, text: 'rate=0.4, difference=721100' },
+                    
+                    { type: 'line', x1: 290, y1: 130, x2: 290, y2: 150 },
+                    { type: 'label', x: 275, y: 145, text: 'No' },
+                    { type: 'diamond', cx: 290, cy: 185, w: 200, h: 60, text: 'income > 2180000?' },
+                    { type: 'line', x1: 390, y1: 185, x2: 450, y2: 185 },
+                    { type: 'label', x: 420, y: 175, text: 'Yes' },
+                    { type: 'rect', x: 450, y: 167.5, w: 230, h: 35, text: 'rate=0.3, difference=312100' },
+                    
+                    { type: 'line', x1: 290, y1: 215, x2: 290, y2: 235 },
+                    { type: 'label', x: 275, y: 230, text: 'No' },
+                    { type: 'diamond', cx: 290, cy: 270, w: 200, h: 60, text: 'income > 1090000?' },
+                    { type: 'line', x1: 390, y1: 270, x2: 450, y2: 270 },
+                    { type: 'label', x: 420, y: 260, text: 'Yes' },
+                    { type: 'rect', x: 450, y: 252.5, w: 230, h: 35, text: 'rate=0.21, difference=115900' },
+                    
+                    { type: 'line', x1: 290, y1: 300, x2: 290, y2: 320 },
+                    { type: 'label', x: 275, y: 315, text: 'No' },
+                    { type: 'diamond', cx: 290, cy: 355, w: 200, h: 60, text: 'income > 410000?' },
+                    { type: 'line', x1: 390, y1: 355, x2: 450, y2: 355 },
+                    { type: 'label', x: 420, y: 345, text: 'Yes' },
+                    { type: 'rect', x: 450, y: 337.5, w: 230, h: 35, text: 'rate=0.13, difference=28700' },
+                    
+                    { type: 'line', x1: 290, y1: 385, x2: 200, y2: 430, noArrow: true },
+                    { type: 'line', x1: 200, y1: 430, x2: 200, y2: 412.5 },
+                    { type: 'label', x: 250, y: 405, text: 'No' },
+                    { type: 'rect', x: 140, y: 337.5, w: 220, h: 35, text: 'rate=0.06, difference=0' },
+                    
+                    { type: 'line', x1: 565, y1: 117.5, x2: 565, y2: 460, noArrow: true },
+                    { type: 'line', x1: 565, y1: 202.5, x2: 565, y2: 460, noArrow: true },
+                    { type: 'line', x1: 565, y1: 287.5, x2: 565, y2: 460, noArrow: true },
+                    { type: 'line', x1: 565, y1: 372.5, x2: 565, y2: 460, noArrow: true },
+                    { type: 'line', x1: 250, y1: 372.5, x2: 250, y2: 460, noArrow: true },
+                    { type: 'line', x1: 250, y1: 460, x2: 565, y2: 460, noArrow: true },
+
+                    { type: 'line', x1: 407.5, y1: 460, x2: 407.5, y2: 480 },
+                    { type: 'rect', x: 297.5, y: 480, w: 220, h: 35, text: 'tax = (income*rate)-difference' },
+                    { type: 'line', x1: 407.5, y1: 515, x2: 407.5, y2: 535 },
+                    { type: 'rect', x: 367.5, y: 535, w: 80, h: 35, text: '列印 tax' }
+                ])}
+                <p><b>程式碼解答：</b></p>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void) {
+    float income, rate, difference, tax;
+
+    printf("請輸入所得總額: ");
+    scanf("%f", &income);
+
+    if (income > 4090000) {
+        rate = 0.40;
+        difference = 721100;
+    } else if (income > 2180000) {
+        rate = 0.30;
+        difference = 312100;
+    } else if (income > 1090000) {
+        rate = 0.21;
+        difference = 115900;
+    } else if (income > 410000) {
+        rate = 0.13;
+        difference = 28700;
+    } else {
+        rate = 0.06;
+        difference = 0;
+    }
+
+    tax = (income * rate) - difference;
+
+    if (tax < 0) {
+      tax = 0; // 稅額不可為負
+    }
+
+    printf("應繳稅額為: %.2f 元\\n", tax);
+
+    return 0;
+}
+</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">請輸入所得總額: 1200000
+應繳稅額為: 136100.00 元</div>
+            </section>
+        `;
+
+        // --- Core Functions ---
+        function generateTOC() {
+            const tocList = document.createElement('ul');
+            tableOfContents.forEach(item => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${item.id}`;
+                link.textContent = item.title;
+                if (item.isChapter) {
+                    listItem.classList.add('chapter');
+                }
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            tocContainer.appendChild(tocList);
+        }
+
+        function setActiveLink(sectionId) {
+             document.querySelectorAll('#toc a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${sectionId}`);
+            });
+        }
+
+        // --- Event Listeners ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        
+        tocContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView();
+                }
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Copy button functionality
+        contentArea.addEventListener('click', function(e) {
+            if (e.target.classList.contains('copy-button')) {
+                const wrapper = e.target.parentElement;
+                const codeElement = wrapper.querySelector('pre code');
+                const codeToCopy = codeElement.innerText;
+                
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    e.target.textContent = '已複製!';
+                    e.target.classList.add('copied');
+                    setTimeout(() => {
+                        e.target.textContent = '複製';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('無法複製程式碼: ', err);
+                    e.target.textContent = '複製失敗';
+                });
+            }
+        });
+        
+        // --- MODIFIED CODE START ---
+        // Intersection Observer for active link highlighting
+        // This version ensures the topmost visible section is always highlighted.
+        const observer = new IntersectionObserver((entries) => {
+            let topEntry = null;
+            // Find the first (topmost on screen) intersecting entry
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                   topEntry = entry;
+                   break;
+                }
+            }
+            if (topEntry) {
+                setActiveLink(topEntry.target.id);
+            }
+        }, { 
+            // rootMargin pushes the "viewport" for detection up by 80% of the screen height.
+            // This makes the link active when the section is near the top of the screen.
+            rootMargin: "0% 0px -80% 0px", 
+            threshold: 0 
+        });
+        // --- MODIFIED CODE END ---
+
+
+        // --- Initialization ---
+        function initialize() {
+            generateTOC();
+            contentArea.innerHTML = pageContent;
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+            Prism.highlightAll();
+            if(window.location.hash) {
+                const id = window.location.hash.substring(1);
+                setActiveLink(id);
+                document.getElementById(id)?.scrollIntoView();
+            } else if (tableOfContents.length > 0) {
+                setActiveLink(tableOfContents[0].id);
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

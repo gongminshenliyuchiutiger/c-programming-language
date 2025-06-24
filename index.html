@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成為程式神不再只是夢想 - 主目錄</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00e5ff; /* 亮青色 */
+            --background-color: #0c0a1a; /* 深藍紫色背景 */
+            --container-bg: rgba(18, 16, 42, 0.6); /* 半透明容器背景 */
+            --text-color: #e0e0e0; /* 淺灰色文字 */
+            --header-color: #ffffff; /* 標題白色 */
+            --border-color: rgba(0, 229, 255, 0.2); /* 青色邊框 */
+            --glow-color: rgba(0, 229, 255, 0.7); /* 青色光暈 */
+        }
+
+        /* 動畫 Keyframes */
+        @keyframes background-pan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+            overflow-x: hidden; /* 防止水平滾動條 */
+        }
+        
+        /* 動態科幻背景 */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: background-pan 60s linear infinite;
+        }
+
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 150px; /* 【修改】增加底部內邊距，防止內容被吉祥物遮擋 */
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .main-header {
+            text-align: center;
+            padding: 40px 20px; /* 【修改】調整了頂部 padding */
+            margin-bottom: 40px;
+            background: var(--container-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .main-header h1 {
+            color: var(--header-color);
+            font-size: 3.2em;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
+        }
+
+        .main-header p {
+            font-size: 1.2em;
+            color: var(--text-color);
+            margin: 5px 0;
+        }
+        
+        .main-header .author {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        /* 吉祥物樣式 - 【修改部分】 */
+        #mascot {
+            position: fixed; /* 改為 fixed，相對於視窗定位 */
+            bottom: 30px;    /* 距離底部 30px */
+            right: 30px;     /* 距離右側 30px */
+            width: 150px;
+            z-index: 5;      /* 確保在內容之上 */
+            cursor: pointer;
+            animation: float 6s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+
+        #mascot:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        /* 粒子畫布 */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            pointer-events: none; /* 讓滑鼠可以穿透畫布點擊下方元素 */
+        }
+
+        .directory-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: var(--header-color);
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            text-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .chapter-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .chapter-list li a {
+            display: block;
+            padding: 20px 25px;
+            background: var(--container-bg);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .chapter-list li a:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 0 25px var(--glow-color);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: rgba(224, 224, 224, 0.6);
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .main-header h1 {
+                font-size: 2.2em;
+            }
+            /* 【修改】響應式吉祥物樣式 */
+            #mascot {
+                width: 100px;
+                bottom: 20px;
+                right: 20px;
+            }
+            .directory-title {
+                font-size: 2em;
+            }
+            .chapter-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- 吉祥物移到 container 外部，使其定位不受容器影響 -->
+    <img src="image/LiyuChill.svg" alt="Mascot" id="mascot">
+
+    <div class="container">
+        <header class="main-header">
+            <!-- 吉祥物 img 標籤已移出 -->
+            <h1>成為程式神不再只是夢想</h1>
+            <p>使用C語言</p>
+            <p class="author">參考資源：人人都能學會寫程式－李家同教你用邏輯思考學程式設計</p>
+        </header>
+
+        <main>
+            <h2 class="directory-title">章節目錄</h2>
+            <ul class="chapter-list">
+                <li><a href="ch01.html">第一章：最簡單的程式</a></li>
+                <li><a href="ch02.html">第二章：有if指令的程式</a></li>
+                <li><a href="ch03.html">第三章：有for迴圈指令的程式</a></li>
+                <li><a href="ch04.html">第四章：有while迴圈指令的程式</a></li>
+                <li><a href="ch05.html">第五章：陣列</a></li>
+                <li><a href="ch06.html">第六章：副程式</a></li>
+                <li><a href="ch07.html">第七章：檔案的應用</a></li>
+                <li><a href="ch08.html">第八章：遞迴程式</a></li>
+                <li><a href="ch09.html">第九章：排序</a></li>
+                <li><a href="ch10.html">第十章：C語言Structure的功能</a></li>
+                <li><a href="ch11.html">第十一章：字串處理的指令</a></li>
+            </ul>
+        </main>
+
+        <footer>
+            Copyright © Liyuchiutiger Gongminshen
+        </footer>
+    </div>
+
+    <script>
+        // --- 粒子特效腳本 (此處無需修改) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        const mascot = document.getElementById('mascot');
+
+        let particles = [];
+        const particleCount = 100; // 每次點擊生成的粒子數量
+        const gravity = 0.08;
+
+        // 設定畫布尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 粒子物件
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 2;
+                this.life = 1; // 生命值 1 -> 0
+                this.alpha = 1;
+                
+                // 隨機速度和方向
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+
+                // 隨機炫彩顏色
+                this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += gravity; // 模擬重力
+                this.life -= 0.015;
+                if (this.life < 0) this.life = 0;
+                this.alpha = this.life;
+            }
+
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createExplosion(x, y) {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles = particles.filter(p => p.life > 0);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            ctx.globalAlpha = 1; // 重置透明度
+            requestAnimationFrame(animateParticles);
+        }
+
+        mascot.addEventListener('click', (e) => {
+            // 獲取吉祥物在視窗中的中心位置
+            // getBoundingClientRect() 依然適用於 fixed 定位的元素
+            const rect = mascot.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            createExplosion(centerX, centerY);
+        });
+        
+        // 啟動動畫循環
+        animateParticles();
+    </script>
+</body>
+</html>

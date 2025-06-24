@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第七章：檔案的應用</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --header-color: #343a40;
+            --border-color: #dee2e6;
+            --sidebar-width: 300px;
+        }
+
+        /* General Body Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background-color: var(--header-color);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            white-space: nowrap; 
+            color: #ffffff;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .sidebar-nav-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .back-button {
+            display: block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #toc li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        #toc > ul > .chapter > a {
+            font-weight: 700;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        #toc li a:hover {
+            background-color: #e2e6ea;
+        }
+
+        #toc li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 5px solid #0056b3;
+            padding-left: 15px;
+        }
+        
+        #toc ul ul { /* Nested list for sections */
+            padding-left: 20px;
+            background-color: #fff;
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 1px 50px 50px 50px;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .content-section {
+            padding-top: 20px;
+            margin-top: -20px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5em;
+            margin-bottom: 1.2em;
+        }
+        h1 { font-size: 2.5em; margin-top: 1em; text-align: center; border-bottom-width: 3px;}
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; border-bottom: 1px dashed #ccc; }
+
+        p, ol, ul {
+            margin-bottom: 1.2em;
+        }
+
+        .diagram-container {
+            max-width: 100%;
+            margin: 25px auto;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+            box-sizing: border-box;
+        }
+        
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre[class*="language-"] {
+            border-radius: 8px;
+            padding: 1.5em !important;
+            margin: 0 !important;
+            line-height: 1.6;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 1;
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--primary-color);
+        }
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        /* Execution example style */
+        .execution-example {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-left: 5px solid #fd971f;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer Style */
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <h3>成為程式神不再只是夢想</h3>
+                <p>使用C語言</p>
+            </header>
+            <div class="sidebar-nav-actions">
+                <a href="index.html" class="back-button">返回主目錄</a>
+            </div>
+            <nav id="toc">
+                <!-- Table of Contents will be generated by JavaScript -->
+            </nav>
+        </aside>
+        <main class="content">
+            <div id="content-area">
+                 <!-- Content will be injected by JavaScript -->
+            </div>
+            <footer>
+                Copyright &copy; Liyuchiutiger Gongminshen
+            </footer>
+        </main>
+    </div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Elements ---
+        const tocContainer = document.getElementById('toc');
+        const contentArea = document.getElementById('content-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // --- Table of Contents Data ---
+        const tableOfContents = [
+            { id: 'ch7-title', title: '第七章：檔案的應用', isChapter: true },
+            { id: 'ch7-sec1', title: '7.1 使用檔案時的一些細節' },
+            { id: 'ch7-sec2', title: '7.2 EOF的功能' },
+            { id: 'ch7-sec3', title: '7.3 中間過程檔案（Log File）' },
+            { id: 'ch7-exercise', title: '練習七' },
+        ];
+
+        // --- Dynamic SVG Generation ---
+        function generateDiagram(elements) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const PADDING = 20;
+            const svgElements = [];
+
+            const updateBounds = (x, y, w = 0, h = 0) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + w);
+                maxY = Math.max(maxY, y + h);
+            };
+            
+            elements.forEach(el => {
+                let svgString = '';
+                switch (el.type) {
+                    case 'rect':
+                        svgString = `<g><rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="4" ry="4" fill="#e3f2fd" stroke="#0d47a1" stroke-width="1.5" /><text x="${el.x + el.w / 2}" y="${el.y + el.h / 2}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.x, el.y, el.w, el.h);
+                        break;
+                    case 'diamond':
+                        const w2 = el.w / 2, h2 = el.h / 2;
+                        const points = `${el.cx},${el.cy - h2} ${el.cx + w2},${el.cy} ${el.cx},${el.cy + h2} ${el.cx - w2},${el.cy}`;
+                        svgString = `<g><polygon points="${points}" fill="#fffde7" stroke="#f57f17" stroke-width="1.5" /><text x="${el.cx}" y="${el.cy}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.cx - w2, el.cy - h2, el.w, el.h);
+                        break;
+                    case 'line':
+                        svgString = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)" />`;
+                        updateBounds(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x1-el.x2), Math.abs(el.y1-el.y2));
+                        break;
+                    case 'label':
+                        svgString = `<text x="${el.x}" y="${el.y}" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#555" text-anchor="middle">${el.text}</text>`;
+                        break;
+                }
+                svgElements.push(svgString);
+            });
+
+            const finalWidth = (maxX - minX) + 2 * PADDING;
+            const finalHeight = (maxY - minY) + 2 * PADDING;
+            const viewBox = `${minX - PADDING} ${minY - PADDING} ${finalWidth} ${finalHeight}`;
+            
+            const defs = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs>`;
+            
+            return `<div class="diagram-container"><svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${defs}${svgElements.join('')}</svg></div>`;
+        }
+
+        // --- Page Content Data ---
+        const pageContent = `
+            <section id="ch7-title" class="content-section">
+                <h1>第七章：檔案的應用</h1>
+                <p>在以上的例題中，我們的輸入都是來自我們的鍵盤，也就是說，假如我們要輸入幾個數字，每一個數字都是由鍵盤輸入的，這當然不切實際。因為假如我們要輸入大量的資料，我們一定會將資料儲存在一個檔案中，然後程式會從檔案中讀取資料。</p>
+                <p>要準備的檔案必需是所謂的文字（text）檔案，其他的檔案會出問題的。假設我們要輸入十個整數，以下的文字檔案是一個例子：</p>
+                <div class="execution-example">2
+5
+19
+3
+6
+9
+21
+45
+8
+17</div>
+            </section>
+
+            <section id="ch7-sec1" class="content-section">
+                <h2>7.1 使用檔案時的一些細節</h2>
+                <p>我們首先要注意的是：我們也許已經將資料放入了一個檔案，也許我們叫它InputFile.txt。但是，奇怪的是：C 語言並不允許我們直接使用這個檔案。換言之，我們不能直截了當地從這個InputFile.txt讀取資料，你必須先打開檔案。打開後的檔案還必須有一個名字，當然囉，你可以仍然沿用原來的檔案名稱。以下是一個典型打開檔案的指令：</p>
+                <div class="code-block-wrapper"><pre><code class="language-c">fp = fopen("InputFile.txt", "r");</code></pre></div>
+                <p>fopen就是打開InputFile.txt的指令，而且將它命名為fp，「r」是可以讀取（read）的意思。當然這也意味著我們是不能將資料寫入這個檔案的。一旦打開了，我們就可以利用之。在利用完了以後，不要忘了關閉這個檔案。以下是典型的關閉檔案指令：</p>
+                <div class="code-block-wrapper"><pre><code class="language-c">fclose(fp);</code></pre></div>
+                <p>懂得了這些該注意的事情以後，我們可以看幾個例子，我們例子的流程都和之前章節類似，所以我們不再介紹，而直接介紹程式。</p>
+
+                <h3>例題7.1-1 兩個陣列的相加</h3>
+                <p>這個例子在前一章的例題6.1-2中已經介紹過，現在我們假設我們的資料放在一個檔案中。</p>
+                <h4>程式 7.1-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+#define INPUT_FILE_NAME "ex_7.1_1_input_file.txt"
+#define MAX_ARRAY_SIZE 256
+
+void add_array(int x[], int y[], int z[], int m);
+void read_array_from_file(int x[], int n, FILE* fp);
+void print_array(int x[], int n);
+
+int main(void)
+{
+    int array_size;
+    int a[MAX_ARRAY_SIZE];
+    int b[MAX_ARRAY_SIZE];
+    int c[MAX_ARRAY_SIZE];
+    FILE *fp;
+
+    fp = fopen(INPUT_FILE_NAME, "r");
+    if (fp != NULL)
+    {
+        printf("Input file opened\\n");
+        fscanf(fp, "%d", &array_size);
+
+        if (array_size < MAX_ARRAY_SIZE) {
+            printf("Reading 1st array\\n");
+            read_array_from_file(a, array_size, fp);
+            print_array(a, array_size);
+            
+            printf("\\nReading 2nd array\\n");
+            read_array_from_file(b, array_size, fp);
+            print_array(b, array_size);
+
+            printf("\\nAdding arrays...\\n");
+            add_array(a, b, c, array_size);
+            printf("The result is:\\n");
+            print_array(c, array_size);
+        } else {
+            printf("Error: Array size exceeds the limit.\\n");
+        }
+        fclose(fp);
+    } else {
+        printf("Error: Could not open file %s\\n", INPUT_FILE_NAME);
+    }
+    return 0;
+}
+
+// 副程式定義 (與第六章類似)
+void add_array(int x[], int y[], int z[], int m) { /* ... */ }
+void read_array_from_file(int x[], int n, FILE* fp) { /* ... */ }
+void print_array(int x[], int n) { /* ... */ }
+</code></pre></div>
+                <p><b>說明：</b>此處省略了副程式的具體實現，因為它們與前一章的概念相似，主要區別在於 <code>read_array_from_file</code> 函數需要一個 <code>FILE *fp</code> 參數，並使用 <code>fscanf</code> 而不是 <code>scanf</code> 來從檔案讀取資料。</p>
+            </section>
+
+            <section id="ch7-sec2" class="content-section">
+                <h2>7.2 EOF的功能</h2>
+                <p>在以上的例子中，我們事先都知道要讀多少資料。假如我們不知道，我們可以利用EOF（End of File），在我們的檔案中，結束的地方，有一個隱藏的控制碼，一旦我們讀到這個控制碼，我們就知道檔案已經讀完了。因為我們一筆一筆地讀資料，我們還可以回傳檔案裡資料的數目。</p>
+                <p>在C 語言中有一個指令，叫做feof(fp)，如果fp檔案沒有讀到檔案結束的控制碼（EOF），feof(fp)就是0，一旦讀到了代表檔案結束的控制碼，feof(fp)會變成1。我們使用feof來檢查是否讀到檔案的結尾。</p>
+                <h3>例題7.2-2 求陣列的最小值</h3>
+                <p>這個例子中，我們不知道所要讀取的陣列大小是多少。我們利用EOF的功能不停的去讀取在檔案中的陣列資料，直到讀到檔案結尾（EOF）為止，然後再找出陣列中的最小值。</p>
+                <h4>程式 7.2-2</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+#define MAX_ARRAY_SIZE 256
+#define INPUT_FILE_NAME "ex_7.2_2_input_file.txt"
+
+int find_min(int x[], int n);
+int read_file(FILE* input_array_file_fp, int array[]);
+
+int main(void) {
+    int n;
+    int a[MAX_ARRAY_SIZE];
+    int min_val;
+    FILE *fp;
+
+    fp = fopen(INPUT_FILE_NAME, "r");
+    if (fp != NULL) {
+        n = read_file(fp, a);
+        fclose(fp);
+        
+        if (n > 0) {
+            min_val = find_min(a, n);
+            printf("The minimal value is %d\\n", min_val);
+        } else {
+            printf("No data in file.\\n");
+        }
+    } else {
+        printf("Error opening file.\\n");
+    }
+    return 0;
+}
+
+int read_file(FILE* fp, int array[]) {
+    int i = 0;
+    while (i < MAX_ARRAY_SIZE && fscanf(fp, "%d", &array[i]) != EOF) {
+        i++;
+    }
+    return i;
+}
+
+int find_min(int x[], int n) {
+    int i, min = x[0];
+    for (i = 1; i < n; i++) {
+        if (x[i] < min) {
+            min = x[i];
+        }
+    }
+    return min;
+}
+</code></pre></div>
+            </section>
+            
+            <section id="ch7-sec3" class="content-section">
+                <h2>7.3 中間過程檔案（Log File）</h2>
+                <p>我們做實驗的時候，一定要將實驗的過程全部記錄下來，以便日後參考。跑一個程式，也應該將全部的過程都記錄進入一個檔案，這個檔案，我們可以稱之為Log File。Log File 是永久性的，程式跑完了，我們可以將這個Log File好好地保存起來，將來可以調出來看。</p>
+                <p>如何將資料寫入一個檔案呢？我們要利用fprintf指令。fprintf和printf非常相似，唯一不同是printf將資料輸出到螢幕上，而fprintf則將資料送到一個檔案裡去。</p>
+                <h3>例題7.3-2 找出所有小於 N的質數</h3>
+                <p>這個程式會從一個檔案讀取一個數字 N，然後找出所有小於 N 的質數。整個過程，包括輸入的 N、找到的質數，都會被記錄到一個日誌檔案 (Log File) 中。</p>
+                <h4>程式 7.3-2</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void prime_output_to_file(int x, FILE *output_file_fp);
+
+int main(void) {
+    int i, N;
+    FILE *input_file_fp;
+    FILE *log_file_fp;
+
+    input_file_fp = fopen("ex_7.3_2_input_file.txt", "r");
+    log_file_fp = fopen("ex_7.3_2_log_file.txt", "w");
+
+    if (input_file_fp != NULL && log_file_fp != NULL) {
+        fprintf(log_file_fp, "Reading from input file...\\n");
+        fscanf(input_file_fp, "%d", &N);
+        fprintf(log_file_fp, "Got positive integer = %d\\n", N);
+        fprintf(log_file_fp, "Finding all prime number(s) smaller than %d\\n", N);
+
+        for (i = 1; i <= N; i++) {
+            prime_output_to_file(i, log_file_fp);
+        }
+
+        fprintf(log_file_fp, "Finished searching.\\n");
+        fclose(input_file_fp);
+        fclose(log_file_fp);
+    } else {
+        printf("Error: Failed to access input/log files.\\n");
+    }
+    return 0;
+}
+
+void prime_output_to_file(int x, FILE *output_file_fp) {
+    int is_prime = 1; // 假設是質數
+    int j;
+    if (x <= 1) is_prime = 0;
+    for (j = 2; j * j <= x; j++) {
+        if (x % j == 0) {
+            is_prime = 0;
+            break;
+        }
+    }
+    if (is_prime) {
+        fprintf(output_file_fp, "%d is a prime number.\\n", x);
+    }
+}
+</code></pre></div>
+            </section>
+            
+            <section id="ch7-exercise" class="content-section">
+                <h2>練習七</h2>
+                <ol>
+                    <li>寫一程式，從檔案中讀入n及a₁,a₂,…,aₙ。計算出a₁²,a₂²,…,aₙ²。再將aᵢ, aᵢ² (i=1到n) 寫到另一檔案上去。</li>
+                    <li>寫一程式，從檔案中讀入n及a₁,a₂,…,aₙ (0 ≤ aᵢ ≤ 100)。計算出 bᵢ = √aᵢ × 10，然後將aᵢ, bᵢ (i=1到n) 寫入另一檔案。</li>
+                    <li>寫一程式，從檔案中讀入一個3×5的矩陣，求此矩陣的transpose，然後將此結果寫到另一檔案。</li>
+                    <li>寫一程式，從一檔案中，讀入一組一元二次方程式ax²+bx+c=0的係數a,b,c其中(b²-4ac)≥0。解此組方程式，並將中間過程及最後答案寫入另一檔案。</li>
+                    <li>寫一程式，從檔案中讀入n及a₁,a₂,…,aₙ，將aₙ,aₙ₋₁,…,a₁寫到另一檔案上去。</li>
+                </ol>
+            </section>
+        `;
+
+        // --- Core Functions ---
+        function generateTOC() {
+            const tocList = document.createElement('ul');
+            tableOfContents.forEach(item => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${item.id}`;
+                link.textContent = item.title;
+                if (item.isChapter) {
+                    listItem.classList.add('chapter');
+                }
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            tocContainer.appendChild(tocList);
+        }
+
+        function setActiveLink(sectionId) {
+             document.querySelectorAll('#toc a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${sectionId}`);
+            });
+        }
+
+        // --- Event Listeners ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        
+        tocContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView();
+                }
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Copy button functionality
+        contentArea.addEventListener('click', function(e) {
+            if (e.target.classList.contains('copy-button')) {
+                const wrapper = e.target.parentElement;
+                const codeElement = wrapper.querySelector('pre code');
+                const codeToCopy = codeElement.innerText;
+                
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    e.target.textContent = '已複製!';
+                    e.target.classList.add('copied');
+                    setTimeout(() => {
+                        e.target.textContent = '複製';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('無法複製程式碼: ', err);
+                    e.target.textContent = '複製失敗';
+                });
+            }
+        });
+        
+        // Intersection Observer for active link highlighting
+        const observer = new IntersectionObserver((entries) => {
+            let topEntry = null;
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                   topEntry = entry;
+                   break;
+                }
+            }
+            if (topEntry) {
+                setActiveLink(topEntry.target.id);
+            }
+        }, { rootMargin: "0% 0px -80% 0px", threshold: 0 });
+
+
+        // --- Initialization ---
+        function initialize() {
+            generateTOC();
+            contentArea.innerHTML = pageContent;
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+            Prism.highlightAll();
+            if(window.location.hash) {
+                const id = window.location.hash.substring(1);
+                setActiveLink(id);
+                document.getElementById(id)?.scrollIntoView();
+            } else if (tableOfContents.length > 0) {
+                setActiveLink(tableOfContents[0].id);
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

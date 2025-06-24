@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章：有for迴圈指令的程式</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --header-color: #343a40;
+            --border-color: #dee2e6;
+            --sidebar-width: 300px;
+        }
+
+        /* General Body Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background-color: var(--header-color);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            white-space: nowrap; 
+            color: #ffffff;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .sidebar-nav-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .back-button {
+            display: block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #toc li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        #toc > ul > .chapter > a {
+            font-weight: 700;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        #toc li a:hover {
+            background-color: #e2e6ea;
+        }
+
+        #toc li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 5px solid #0056b3;
+            padding-left: 15px;
+        }
+        
+        #toc ul ul { /* Nested list for sections */
+            padding-left: 20px;
+            background-color: #fff;
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 1px 50px 50px 50px;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .content-section {
+            padding-top: 20px;
+            margin-top: -20px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5em;
+            margin-bottom: 1.2em;
+        }
+        h1 { font-size: 2.5em; margin-top: 1em; text-align: center; border-bottom-width: 3px;}
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; border-bottom: 1px dashed #ccc; }
+
+        p, ol, ul {
+            margin-bottom: 1.2em;
+        }
+
+        .diagram-container {
+            max-width: 100%;
+            margin: 25px auto;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+            box-sizing: border-box;
+        }
+        
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre[class*="language-"] {
+            border-radius: 8px;
+            padding: 1.5em !important;
+            margin: 0 !important;
+            line-height: 1.6;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 1;
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--primary-color);
+        }
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        /* Execution example style */
+        .execution-example {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-left: 5px solid #fd971f;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer Style */
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <h3>成為程式神不再只是夢想</h3>
+                <p>使用C語言</p>
+            </header>
+            <div class="sidebar-nav-actions">
+                <a href="index.html" class="back-button">返回主目錄</a>
+            </div>
+            <nav id="toc">
+                <!-- Table of Contents will be generated by JavaScript -->
+            </nav>
+        </aside>
+        <main class="content">
+            <div id="content-area">
+                 <!-- Content will be injected by JavaScript -->
+            </div>
+            <footer>
+                Copyright &copy; Liyuchiutiger Gongminshen
+            </footer>
+        </main>
+    </div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Elements ---
+        const tocContainer = document.getElementById('toc');
+        const contentArea = document.getElementById('content-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // --- Table of Contents Data ---
+        const tableOfContents = [
+            { id: 'ch3-title', title: '第三章：有for迴圈指令的程式', isChapter: true },
+            { id: 'ch3-sec1', title: '3.1 簡單的for迴圈指令' },
+            { id: 'ch3-sec2', title: '3.2 有雙層迴圈的程式' },
+            { id: 'ch3-sec3', title: '3.3 for迴圈的流程圖' },
+            { id: 'ch3-exercise', title: '練習三與解答' },
+        ];
+
+        // --- Dynamic SVG Generation ---
+        function generateDiagram(elements) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const PADDING = 20;
+            const svgElements = [];
+
+            const updateBounds = (x, y, w = 0, h = 0) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + w);
+                maxY = Math.max(maxY, y + h);
+            };
+            
+            elements.forEach(el => {
+                let svgString = '';
+                switch (el.type) {
+                    case 'rect':
+                        svgString = `<g><rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="4" ry="4" fill="#e3f2fd" stroke="#0d47a1" stroke-width="1.5" /><text x="${el.x + el.w / 2}" y="${el.y + el.h / 2}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.x, el.y, el.w, el.h);
+                        break;
+                    case 'diamond':
+                        const w2 = el.w / 2, h2 = el.h / 2;
+                        const points = `${el.cx},${el.cy - h2} ${el.cx + w2},${el.cy} ${el.cx},${el.cy + h2} ${el.cx - w2},${el.cy}`;
+                        svgString = `<g><polygon points="${points}" fill="#fffde7" stroke="#f57f17" stroke-width="1.5" /><text x="${el.cx}" y="${el.cy}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.cx - w2, el.cy - h2, el.w, el.h);
+                        break;
+                    case 'line':
+                        svgString = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)" />`;
+                        updateBounds(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x1-el.x2), Math.abs(el.y1-el.y2));
+                        break;
+                    case 'label':
+                        svgString = `<text x="${el.x}" y="${el.y}" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#555" text-anchor="middle">${el.text}</text>`;
+                        break;
+                }
+                svgElements.push(svgString);
+            });
+
+            const finalWidth = (maxX - minX) + 2 * PADDING;
+            const finalHeight = (maxY - minY) + 2 * PADDING;
+            const viewBox = `${minX - PADDING} ${minY - PADDING} ${finalWidth} ${finalHeight}`;
+            
+            const defs = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs>`;
+            
+            return `<div class="diagram-container"><svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${defs}${svgElements.join('')}</svg></div>`;
+        }
+
+        // --- Page Content Data ---
+        const pageContent = `
+            <section id="ch3-title" class="content-section">
+                <h1>第三章：有for迴圈指令的程式</h1>
+                <p>在寫程式的時候，我們常常遇到一個要重複做幾乎同樣指令的情形。這種程式必定含有迴圈指令。迴圈指令有兩種，第一種是for迴圈指令，第二種是while迴圈指令，本章介紹for迴圈指令。</p>
+            </section>
+
+            <section id="ch3-sec1" class="content-section">
+                <h2>3.1 簡單的for迴圈指令</h2>
+                <h3>例題3.1-2 N個數的和</h3>
+                <p>我們現在要求N個數的和，N由使用者輸入。這個程式的流程圖和前一個例子很像，只是迴圈的終止條件從一個固定的數字5，變成了一個變數N。</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 80, y: 10, w: 120, h: 35, text: '讀入整數 N' },
+                    { type: 'line', x1: 140, y1: 45, x2: 140, y2: 65 },
+                    { type: 'rect', x: 80, y: 65, w: 120, h: 35, text: 'sum = 0' },
+                    { type: 'line', x1: 140, y1: 100, x2: 140, y2: 120 },
+                    { type: 'rect', x: 80, y: 120, w: 120, h: 35, text: 'i = 1' },
+                    { type: 'line', x1: 140, y1: 155, x2: 140, y2: 175 },
+                    { type: 'diamond', cx: 140, cy: 210, w: 100, h: 70, text: 'i <= N?' },
+                    { type: 'line', x1: 190, y1: 210, x2: 250, y2: 210 },
+                    { type: 'label', x: 220, y: 200, text: 'Yes' },
+                    { type: 'rect', x: 250, y: 192.5, w: 120, h: 35, text: '輸入一數 x' },
+                    { type: 'line', x1: 310, y1: 227.5, x2: 310, y2: 250 },
+                    { type: 'rect', x: 250, y: 250, w: 120, h: 35, text: 'sum = sum + x' },
+                    { type: 'line', x1: 310, y1: 285, x2: 310, y2: 310 },
+                    { type: 'rect', x: 250, y: 310, w: 120, h: 35, text: 'i = i + 1' },
+                    { type: 'line', x1: 310, y1: 345, x2: 310, y2: 370, noArrow: true },
+                    { type: 'line', x1: 140, y1: 370, x2: 310, y2: 370, noArrow: true },
+                    { type: 'line', x1: 140, y1: 370, x2: 140, y2: 175, noArrow: true },
+                    { type: 'line', x1: 140, y1: 245, x2: 50, y2: 280, noArrow: true },
+                    { type: 'line', x1: 50, y1: 280, x2: 90, y2: 280 },
+                    { type: 'label', x: 100, y: 240, text: 'No' },
+                    { type: 'rect', x: 20, y: 262.5, w: 100, h: 35, text: '印出 sum' }
+                ])}
+                
+                <h4>程式 3.1-2</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int N, x, sum, i;
+    printf("Enter N: ");
+    scanf("%d", &N);
+
+    for(sum = 0, i = 1; i <= N; i = i + 1)
+    {
+        printf("Enter x: ");
+        scanf("%d", &x);
+        sum = sum + x;
+    }
+    printf("sum = %d\\n", sum);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter N: 3
+Enter x: 10
+Enter x: 20
+Enter x: 30
+sum = 60</div>
+                <h4>解釋：for迴圈的結構</h4>
+                <p>for迴圈是一個非常強大的指令，它將迴圈需要的三個要素：<b>初始設定</b>、<b>終止條件</b>、和<b>更新計數器</b>都整合在一個括號內，語法如下：</p>
+                <p><code>for ( 初始設定; 終止條件; 更新計數器 ) { ...迴圈主體... }</code></p>
+                <ul>
+                    <li><b>初始設定 (例如 <code>sum=0, i=1</code>)</b>: 在迴圈開始前僅執行一次的指令，用於初始化變數。</li>
+                    <li><b>終止條件 (例如 <code>i <= N</code>)</b>: 在每一次迴圈開始前都會檢查此條件。若為真(true)，則執行迴圈主體；若為假(false)，則跳出迴圈。</li>
+                    <li><b>更新計數器 (例如 <code>i = i + 1</code>)</b>: 在每一次迴圈主體執行完畢後，執行的指令。通常用來更新控制迴圈的變數。C語言中，<code>i = i + 1</code> 也可以簡寫為 <code>i++</code>。</li>
+                </ul>
+            </section>
+            
+            <section id="ch3-sec2" class="content-section">
+                <h2>3.2 有雙層迴圈的程式</h2>
+                <h3>例題3.2-1 求N個學生三門課的平均分數</h3>
+                <p>假設我們要計算N個學生的成績，每個學生有3門課。我們需要為每位學生計算平均分數。這就需要用到雙層迴圈：外層迴圈處理每個學生，內層迴圈處理該學生的三門課成績。</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 200, y: 10, w: 100, h: 35, text: '讀入 N' },
+                    { type: 'line', x1: 250, y1: 45, x2: 250, y2: 65 },
+                    { type: 'rect', x: 200, y: 65, w: 100, h: 35, text: 'i = 1' },
+                    { type: 'line', x1: 250, y1: 100, x2: 250, y2: 120 },
+                    { type: 'diamond', cx: 250, cy: 155, w: 100, h: 70, text: 'i <= N?' },
+                    { type: 'line', x1: 250, y1: 190, x2: 250, y2: 440, noArrow: true },
+                    { type: 'line', x1: 250, y1: 440, x2: 150, y2: 440 },
+                    { type: 'rect', x: 200, y: 460, w: 100, h: 35, text: 'i = i + 1' },
+                    { type: 'line', x1: 250, y1: 495, x2: 250, y2: 520, noArrow: true },
+                    { type: 'line', x1: 150, y1: 440, x2: 150, y2: 155, noArrow: true },
+                    { type: 'line', x1: 150, y1: 155, x2: 200, y2: 155, noArrow: true },
+
+                    { type: 'line', x1: 300, y1: 155, x2: 360, y2: 155 },
+                    { type: 'label', x: 330, y: 145, text: 'Yes' },
+                    { type: 'rect', x: 360, y: 137.5, w: 120, h: 35, text: 'sum = 0, j = 1' },
+                    { type: 'line', x1: 420, y1: 172.5, x2: 420, y2: 190 },
+                    { type: 'diamond', cx: 420, cy: 225, w: 100, h: 70, text: 'j <= 3?' },
+                    { type: 'line', x1: 470, y1: 225, x2: 520, y2: 225 },
+                    { type: 'label', x: 495, y: 215, text: 'Yes' },
+                    { type: 'rect', x: 520, y: 207.5, w: 120, h: 35, text: '讀入一門成績x' },
+                    { type: 'line', x1: 580, y1: 242.5, x2: 580, y2: 260 },
+                    { type: 'rect', x: 520, y: 260, w: 120, h: 35, text: 'sum = sum + x' },
+                    { type: 'line', x1: 580, y1: 295, x2: 580, y2: 315 },
+                    { type: 'rect', x: 520, y: 315, w: 120, h: 35, text: 'j = j + 1' },
+                    { type: 'line', x1: 580, y1: 350, x2: 580, y2: 370, noArrow: true },
+                    { type: 'line', x1: 420, y1: 370, x2: 580, y2: 370, noArrow: true },
+                    { type: 'line', x1: 420, y1: 370, x2: 420, y2: 190, noArrow: true },
+                    
+                    { type: 'line', x1: 420, y1: 260, x2: 420, y2: 280 },
+                    { type: 'label', x: 405, y: 275, text: 'No' },
+                    { type: 'rect', x: 360, y: 280, w: 120, h: 35, text: 'avg = sum / 3' },
+                    { type: 'line', x1: 420, y1: 315, x2: 420, y2: 335 },
+                    { type: 'rect', x: 360, y: 335, w: 120, h: 35, text: '列印 i, avg' },
+                    { type: 'line', x1: 420, y1: 370, x2: 420, y2: 495, noArrow: true },
+                    { type: 'line', x1: 250, y1: 495, x2: 420, y2: 495 },
+                    
+                    { type: 'line', x1: 200, y1: 155, x2: 120, y2: 155},
+                    { type: 'label', x: 160, y: 145, text: 'No' },
+                    { type: 'rect', x: 20, y: 137.5, w: 100, h: 35, text: '結束' }
+                ])}
+
+                <h4>程式 3.2-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int N, x, i, j, sum;
+    float avg;
+
+    printf("請輸入學生人數: ");
+    scanf("%d", &N);
+
+    for (i = 1; i <= N; i++) {
+        sum = 0;
+        printf("\\n--- 正在輸入第 %d 位學生的成績 ---\\n", i);
+        for (j = 1; j <= 3; j++) {
+            printf("請輸入第 %d 門課的成績: ", j);
+            scanf("%d", &x);
+            sum = sum + x;
+        }
+        avg = (float)sum / 3;
+        printf("學生 %d 的平均成績是: %.2f\\n", i, avg);
+    }
+    return 0;
+}</code></pre></div>
+            </section>
+            
+            <section id="ch3-sec3" class="content-section">
+                <h2>3.3 for迴圈的流程圖</h2>
+                <p>將帶有迴圈和條件判斷的程式碼轉換為流程圖，是理解程式邏輯的重要練習。以下程式碼包含了一個外層迴圈、一個if判斷式，以及一個內層迴圈。</p>
+                <h4>程式 3.3-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void main(void) {
+    int x, y, z;
+    for (x = 0; x < 10; x++) {
+        y = x + 20;
+        if (y < 30) {
+            for (z = 0; z < 3; z++) {
+                printf("x+y+z=%d.\\n", (x + y + z));
+            }
+        }
+    }
+}</code></pre></div>
+                 <h4>流程圖 3.3-4</h4>
+                ${generateDiagram([
+                    { type: 'rect', x: 250, y: 10, w: 100, h: 35, text: 'x = 0' },
+                    { type: 'line', x1: 300, y1: 45, x2: 300, y2: 65 },
+                    { type: 'diamond', cx: 300, cy: 100, w: 100, h: 70, text: 'x < 10?' },
+                    { type: 'line', x1: 350, y1: 100, x2: 440, y2: 100, noArrow: true },
+                    { type: 'line', x1: 440, y1: 100, x2: 440, y2: 82.5 },
+                    { type: 'label', x: 395, y: 90, text: 'Yes' },
+                    { type: 'rect', x: 380, y: 10, w: 120, h: 35, text: '程式結束' },
+                    { type: 'line', x1: 300, y1: 135, x2: 300, y2: 155 },
+                    { type: 'label', x: 280, y: 150, text: 'No' },
+                    { type: 'rect', x: 240, y: 155, w: 120, h: 35, text: 'y = x + 20' },
+                    { type: 'line', x1: 300, y1: 190, x2: 300, y2: 210 },
+                    { type: 'diamond', cx: 300, cy: 245, w: 100, h: 70, text: 'y < 30?' },
+                    { type: 'line', x1: 300, y1: 280, x2: 300, y2: 470, noArrow: true },
+                    { type: 'line', x1: 150, y1: 470, x2: 300, y2: 470, noArrow: true },
+                    { type: 'rect', x: 120, y: 415, w: 120, h: 35, text: 'x = x + 1' },
+                    { type: 'line', x1: 180, y1: 415, x2: 180, y2: 100, noArrow: true },
+                    { type: 'line', x1: 180, y1: 100, x2: 250, y2: 100 },
+                    { type: 'label', x: 275, y: 295, text: 'No' },
+                    { type: 'line', x1: 350, y1: 245, x2: 400, y2: 245 },
+                    { type: 'label', x: 375, y: 235, text: 'Yes' },
+                    { type: 'rect', x: 400, y: 227.5, w: 100, h: 35, text: 'z = 0' },
+                    { type: 'line', x1: 450, y1: 262.5, x2: 450, y2: 280 },
+                    { type: 'diamond', cx: 450, cy: 315, w: 100, h: 70, text: 'z < 3?' },
+                    { type: 'line', x1: 450, y1: 350, x2: 450, y2: 470, noArrow: true },
+                    { type: 'line', x1: 500, y1: 315, x2: 550, y2: 315 },
+                    { type: 'label', x: 525, y: 305, text: 'Yes' },
+                    { type: 'rect', x: 550, y: 297.5, w: 180, h: 35, text: '列印 x+y+z 的值' },
+                    { type: 'line', x1: 640, y1: 332.5, x2: 640, y2: 370, noArrow: true },
+                    { type: 'line', x1: 480, y1: 370, x2: 640, y2: 370, noArrow: true },
+                    { type: 'rect', x: 450, y: 390, w: 120, h: 35, text: 'z = z + 1' },
+                    { type: 'line', x1: 510, y1: 425, x2: 510, y2: 440, noArrow: true },
+                    { type: 'line', x1: 450, y1: 440, x2: 510, y2: 440, noArrow: true },
+                    { type: 'line', x1: 450, y1: 440, x2: 450, y2: 280, noArrow: true }
+                ])}
+            </section>
+            
+            <section id="ch3-exercise" class="content-section">
+                <h2>練習三與解答</h2>
+                <h4>練習：奇數階乘之和</h4>
+                <p>撰寫一個程式，讓使用者首先輸入一個數字N，代表接下來要輸入N個數字。程式接著讀取這N個數字，並只針對其中的奇數計算其階乘，最後將所有奇數的階乘加總並輸出結果。例如：輸入N=5，接著輸入 1, 2, 3, 4, 5，程式會計算 1! + 3! + 5! = 1 + 6 + 120 = 127。</p>
+                <p><b>流程圖：</b></p>
+                ${generateDiagram([
+                    { type: 'rect', x: 250, y: 10, w: 200, h: 35, text: '宣告變數' },
+                    { type: 'line', x1: 350, y1: 45, x2: 350, y2: 65 },
+                    { type: 'rect', x: 250, y: 65, w: 200, h: 35, text: '讀入 N' },
+                    { type: 'line', x1: 350, y1: 100, x2: 350, y2: 120 },
+                    { type: 'rect', x: 250, y: 120, w: 200, h: 35, text: 'Odd_Sum = 0, i = 1' },
+                    { type: 'line', x1: 350, y1: 155, x2: 350, y2: 175 },
+                    { type: 'diamond', cx: 350, cy: 210, w: 100, h: 70, text: 'i <= N?' },
+                    { type: 'line', x1: 400, y1: 210, x2: 480, y2: 210 },
+                    { type: 'label', x: 440, y: 200, text: 'Yes' },
+                    { type: 'rect', x: 480, y: 192.5, w: 120, h: 35, text: '讀入 num' },
+                    { type: 'line', x1: 540, y1: 227.5, x2: 540, y2: 250 },
+                    { type: 'diamond', cx: 540, cy: 285, w: 120, h: 70, text: 'num % 2 != 0?' },
+                    { type: 'line', x1: 540, y1: 320, x2: 540, y2: 600, noArrow: true },
+                    { type: 'line', x1: 350, y1: 600, x2: 540, y2: 600, noArrow: true },
+                    { type: 'rect', x: 300, y: 620, w: 100, h: 35, text: 'i = i + 1' },
+                    { type: 'line', x1: 350, y1: 655, x2: 350, y2: 680, noArrow: true },
+                    { type: 'line', x1: 350, y1: 680, x2: 150, y2: 680, noArrow: true },
+                    { type: 'line', x1: 150, y1: 680, x2: 150, y2: 210, noArrow: true },
+                    { type: 'line', x1: 300, y1: 210, x2: 150, y2: 210 },
+                    { type: 'label', x: 225, y: 200, text: 'No' },
+                    { type: 'rect', x: 30, y: 192.5, w: 180, h: 35, text: '印出 Odd_Sum' },
+                    { type: 'line', x1: 600, y1: 285, x2: 660, y2: 285 },
+                    { type: 'label', x: 630, y: 275, text: 'Yes' },
+                    { type: 'rect', x: 660, y: 267.5, w: 120, h: 35, text: 'Odd = 1' },
+                    { type: 'line', x1: 720, y1: 302.5, x2: 720, y2: 320 },
+                    { type: 'rect', x: 660, y: 320, w: 120, h: 35, text: 'j = 1' },
+                    { type: 'line', x1: 720, y1: 355, x2: 720, y2: 375 },
+                    { type: 'diamond', cx: 720, cy: 410, w: 100, h: 70, text: 'j <= num?' },
+                    { type: 'line', x1: 770, y1: 410, x2: 830, y2: 410 },
+                    { type: 'rect', x: 830, y: 392.5, w: 120, h: 35, text: 'Odd = Odd * j' },
+                    { type: 'line', x1: 890, y1: 427.5, x2: 890, y2: 460 },
+                    { type: 'rect', x: 830, y: 460, w: 120, h: 35, text: 'j = j + 1' },
+                    { type: 'line', x1: 890, y1: 495, x2: 890, y2: 520, noArrow: true },
+                    { type: 'line', x1: 720, y1: 520, x2: 890, y2: 520, noArrow: true },
+                    { type: 'line', x1: 720, y1: 520, x2: 720, y2: 375, noArrow: true },
+                    { type: 'line', x1: 720, y1: 445, x2: 720, y2: 465 },
+                    { type: 'rect', x: 660, y: 465, w: 120, h: 35, text: 'Odd_Sum += Odd' },
+                    { type: 'line', x1: 720, y1: 500, x2: 720, y2: 600, noArrow: true }
+                ])}
+                <p><b>程式碼解答：</b></p>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void) {
+    long long odd_factorial, odd_sum = 0;
+    int n, i, j, num;
+
+    printf("請輸入數字總數 N: ");
+    scanf("%d", &n);
+
+    for (i = 1; i <= n; i++) {
+        printf("請輸入第 %d 個數字: ", i);
+        scanf("%d", &num);
+
+        // 判斷是否為奇數
+        if (num % 2 != 0) {
+            // 計算階乘
+            odd_factorial = 1;
+            for (j = 1; j <= num; j++) {
+                odd_factorial *= j;
+            }
+            // 累加到總和
+            odd_sum += odd_factorial;
+        }
+    }
+
+    printf("所有奇數的階乘總和為: %lld\\n", odd_sum);
+
+    return 0;
+}
+</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">請輸入數字總數 N: 5
+請輸入第 1 個數字: 1
+請輸入第 2 個數字: 2
+請輸入第 3 個數字: 3
+請輸入第 4 個數字: 4
+請輸入第 5 個數字: 5
+所有奇數的階乘總和為: 127</div>
+            </section>
+        `;
+
+        // --- Core Functions ---
+        function generateTOC() {
+            const tocList = document.createElement('ul');
+            tableOfContents.forEach(item => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${item.id}`;
+                link.textContent = item.title;
+                if (item.isChapter) {
+                    listItem.classList.add('chapter');
+                }
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            tocContainer.appendChild(tocList);
+        }
+
+        function setActiveLink(sectionId) {
+             document.querySelectorAll('#toc a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${sectionId}`);
+            });
+        }
+
+        // --- Event Listeners ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        
+        tocContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView();
+                }
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Copy button functionality
+        contentArea.addEventListener('click', function(e) {
+            if (e.target.classList.contains('copy-button')) {
+                const wrapper = e.target.parentElement;
+                const codeElement = wrapper.querySelector('pre code');
+                const codeToCopy = codeElement.innerText;
+                
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    e.target.textContent = '已複製!';
+                    e.target.classList.add('copied');
+                    setTimeout(() => {
+                        e.target.textContent = '複製';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('無法複製程式碼: ', err);
+                    e.target.textContent = '複製失敗';
+                });
+            }
+        });
+        
+        // --- MODIFIED Intersection Observer for active link highlighting ---
+        const observer = new IntersectionObserver((entries) => {
+            let topEntry = null;
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                   topEntry = entry;
+                   break;
+                }
+            }
+            if (topEntry) {
+                setActiveLink(topEntry.target.id);
+            }
+        }, { rootMargin: "0% 0px -80% 0px", threshold: 0 });
+
+
+        // --- Initialization ---
+        function initialize() {
+            generateTOC();
+            contentArea.innerHTML = pageContent;
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+            Prism.highlightAll();
+            if(window.location.hash) {
+                const id = window.location.hash.substring(1);
+                setActiveLink(id);
+                document.getElementById(id)?.scrollIntoView();
+            } else if (tableOfContents.length > 0) {
+                setActiveLink(tableOfContents[0].id);
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

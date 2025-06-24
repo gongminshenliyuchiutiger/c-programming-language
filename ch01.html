@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第一章：最簡單的程式</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --header-color: #343a40;
+            --border-color: #dee2e6;
+            --sidebar-width: 300px;
+        }
+
+        /* General Body Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background-color: var(--header-color);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            white-space: nowrap; 
+            color: #ffffff; /* Explicitly set to white */
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #ffffff; /* Explicitly set to white */
+            opacity: 0.9;
+        }
+        
+        .sidebar-nav-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .back-button {
+            display: block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3; /* A darker shade of primary */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #toc li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        #toc > ul > .chapter > a {
+            font-weight: 700;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        #toc li a:hover {
+            background-color: #e2e6ea;
+        }
+
+        #toc li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 5px solid #0056b3;
+            padding-left: 15px;
+        }
+        
+        #toc ul ul { /* Nested list for sections */
+            padding-left: 20px;
+            background-color: #fff;
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 1px 50px 50px 50px;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .content-section {
+            padding-top: 20px;
+            margin-top: -20px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5em;
+            margin-bottom: 1.2em;
+        }
+        h1 { font-size: 2.5em; margin-top: 1em; text-align: center; border-bottom-width: 3px;}
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; border-bottom: 1px dashed #ccc; }
+
+        p, ol, ul {
+            margin-bottom: 1.2em;
+        }
+
+        /* --- MODIFIED SVG STYLES --- */
+        .diagram-container {
+            max-width: 100%;
+            margin: 25px auto;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+            box-sizing: border-box;
+        }
+        
+        .math-formula {
+            display: block;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.3em;
+            margin: 25px 0;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre[class*="language-"] {
+            border-radius: 8px;
+            padding: 1.5em !important;
+            margin: 0 !important;
+            line-height: 1.6;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 1;
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--primary-color);
+        }
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        /* Execution example style */
+        .execution-example {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-left: 5px solid #fd971f;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer Style */
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <h3>成為程式神不再只是夢想</h3>
+                <p>使用C語言</p>
+            </header>
+            <div class="sidebar-nav-actions">
+                <a href="index.html" class="back-button">返回主目錄</a>
+            </div>
+            <nav id="toc">
+                <!-- Table of Contents will be generated by JavaScript -->
+            </nav>
+        </aside>
+        <main class="content">
+            <div id="content-area">
+                 <!-- Content will be injected by JavaScript -->
+            </div>
+            <footer>
+                Copyright &copy; Liyuchiutiger Gongminshen
+            </footer>
+        </main>
+    </div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Elements ---
+        const tocContainer = document.getElementById('toc');
+        const contentArea = document.getElementById('content-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // --- Table of Contents Data ---
+        const tableOfContents = [
+            { id: 'ch1-title', title: '第一章：最簡單的程式', isChapter: true },
+            { id: 'ch1-sec1', title: '1.1 整數的加減乘除' },
+            { id: 'ch1-sec2', title: '1.2 實數的加減乘除' },
+            { id: 'ch1-sec3', title: '1.3 四則運算' },
+            { id: 'ch1-exercise', title: '練習一與解答' },
+        ];
+        
+        // --- MODIFIED SVG Generation Function ---
+        function generateDiagram(elements) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const PADDING = 20;
+            const svgElements = [];
+
+            const updateBounds = (x, y, w = 0, h = 0) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + w);
+                maxY = Math.max(maxY, y + h);
+            };
+            
+            elements.forEach(el => {
+                let svgString = '';
+                switch (el.type) {
+                    case 'rect':
+                        svgString = `<g><rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="4" ry="4" fill="#e3f2fd" stroke="#0d47a1" stroke-width="1.5" /><text x="${el.x + el.w / 2}" y="${el.y + el.h / 2}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.x, el.y, el.w, el.h);
+                        break;
+                    case 'diamond':
+                        const w2 = el.w / 2, h2 = el.h / 2;
+                        const points = `${el.cx},${el.cy - h2} ${el.cx + w2},${el.cy} ${el.cx},${el.cy + h2} ${el.cx - w2},${el.cy}`;
+                        svgString = `<g><polygon points="${points}" fill="#fffde7" stroke="#f57f17" stroke-width="1.5" /><text x="${el.cx}" y="${el.cy}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.cx - w2, el.cy - h2, el.w, el.h);
+                        break;
+                    case 'line':
+                        svgString = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)" />`;
+                        updateBounds(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x1-el.x2), Math.abs(el.y1-el.y2));
+                        break;
+                    case 'label':
+                        svgString = `<text x="${el.x}" y="${el.y}" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#555" text-anchor="middle">${el.text}</text>`;
+                        break;
+                }
+                svgElements.push(svgString);
+            });
+
+            const finalWidth = (maxX - minX) + 2 * PADDING;
+            const finalHeight = (maxY - minY) + 2 * PADDING;
+            const viewBox = `${minX - PADDING} ${minY - PADDING} ${finalWidth} ${finalHeight}`;
+            
+            const defs = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs>`;
+            
+            return `<div class="diagram-container"><svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${defs}${svgElements.join('')}</svg></div>`;
+        }
+
+        // --- Page Content Data (with MODIFIED SVG calls) ---
+        const pageContent = `
+            <section id="ch1-title" class="content-section">
+                <h1>第一章：最簡單的程式</h1>
+                <p>寫程式，不妨從最簡單的學起。我們在這一章將介紹幾個非常簡單的程式，也會利用這些程式來介紹一些 C 語言的語法。</p>
+            </section>
+
+            <section id="ch1-sec1" class="content-section">
+                <h2>1.1 整數的加減乘除</h2>
+                <h3>例題1.1-1 整數的加法</h3>
+                <p>假設我們有兩個整數x和y，我們要求x＋y，我們的程式的流程圖如下：</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 40, y: 10, w: 140, h: 35, text: "宣告 x,y,z 為變數" },
+                    { type: 'line', x1: 110, y1: 45, x2: 110, y2: 65 },
+                    { type: 'rect', x: 40, y: 65, w: 140, h: 35, text: "讀入 x 和 y" },
+                    { type: 'line', x1: 110, y1: 100, x2: 110, y2: 120 },
+                    { type: 'rect', x: 40, y: 120, w: 140, h: 35, text: "z = x + y" },
+                    { type: 'line', x1: 110, y1: 155, x2: 110, y2: 175 },
+                    { type: 'rect', x: 40, y: 175, w: 140, h: 35, text: "印出 z" },
+                    { type: 'line', x1: 110, y1: 210, x2: 110, y2: 230 },
+                    { type: 'rect', x: 40, y: 230, w: 140, h: 35, text: "結束" }
+                ])}
+                
+                <h4>程式 1.1-1 整數的加法</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int x, y, z; /*宣告x, y, z為變數*/
+    printf("Enter x: "); /*在螢幕上顯示字串提示輸入*/
+    scanf("%d", &x); /*由鍵盤輸入數值*/
+    printf("Enter y: "); /*在螢幕上顯示字串提示輸入*/
+    scanf("%d", &y); /*由鍵盤輸入數值*/
+    
+    printf("x = %d\\n", x); /*在螢幕顯示讀到的x值*/
+    printf("y = %d\\n", y); /*在螢幕顯示讀到的y值*/
+    
+    z = x + y; /*將x與y相加後存入z變數*/
+    printf("z = x + y = %d.\\n", z); /*將運算結果顯示至螢幕上*/
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter x: 5
+Enter y: 3
+x = 5
+y = 3
+z = x + y = 8.</div>
+                <h4>解釋</h4>
+                <ul>
+                    <li><b>#include &lt;stdio.h&gt;</b>: 這是一個載入指令，表示我們要載入標準輸出入函式庫 (Standard Input/Output)，這樣才能使用 <code>printf</code> 和 <code>scanf</code>。</li>
+                    <li><b>int main(void)</b>: 任何C程式皆有一個主程式，這個主程式一定叫做main。程式從這裡開始執行。</li>
+                    <li><b>int x, y, z;</b>: 宣告x, y, z 這三個變數為整數（integer）。</li>
+                    <li><b>printf(...)</b>: 一個列印指令，會將雙引號中的文字顯示在螢幕上。</li>
+                    <li><b>scanf("%d", &x);</b>: 一個讀取指令，它會等待使用者從鍵盤輸入一個十進位整數 (<code>%d</code>) 並存入變數 x 的記憶體位置 (<code>&x</code>) 中。</li>
+                    <li><b>z = x + y;</b>: 將x與y的值相加之後存到z。同樣的，減法用 <code>-</code>，乘法用 <code>*</code>，除法用 <code>/</code>。</li>
+                </ul>
+            </section>
+
+            <section id="ch1-sec2" class="content-section">
+                <h2>1.2 實數的加減乘除</h2>
+                <h3>例題1.2-1 實數的加法</h3>
+                <p>如果我們讀入的x和y是實數（即帶有小數點的數字），唯一要做的事，是要宣告x和y是實數。流程圖和整數加法一樣，但程式碼需要修改。</p>
+                <h4>程式 1.2-1 實數的加法</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    float x, y, z; /*宣告x, y, z為浮點數(實數)*/
+    printf("Enter x: ");
+    scanf("%f", &x);
+    printf("Enter y: ");
+    scanf("%f", &y);
+    z = x + y;
+    printf("z = x + y = %f\\n", z);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter x: 3.2
+Enter y: 5.3
+z = x + y = 8.500000</div>
+                <h4>解釋</h4>
+                <p>這個程式與上一個程式主要的差別在於它的變數的型態為實數，所以有關使用變數的部分，都需要做對應的修改。</p>
+                <ul>
+                    <li><b>float x, y, z;</b>: 宣告變數為浮點數 (float)，也就是實數。</li>
+                    <li><b>scanf("%f", &x);</b>: 使用 <code>%f</code> 來讀取浮點數。</li>
+                    <li><b>printf("%f", z);</b>: 使用 <code>%f</code> 來印出浮點數。預設會印出六位小數。</li>
+                </ul>
+            </section>
+
+            <section id="ch1-sec3" class="content-section">
+                <h2>1.3 四則運算</h2>
+                <h3>例題1.3-4： 二次方程式的根</h3>
+                <p>如果我們有一個一元二次方程式 ax² + bx + c = 0，它的兩個根是：</p>
+                <div class="math-formula">x₁, x₂ = ( -b ± √(b²-4ac) ) / 2a</div>
+                <p>我們在此假設 b²－4ac ≥ 0 ，免得我們會產生有虛數的解。要求出 x₁ 和 x₂ 的值，我們可以用以下的流程圖：</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 30, y: 10, w: 190, h: 35, text: "宣告 a,b,c,t,x1,x2 為實數" },
+                    { type: 'line', x1: 125, y1: 45, x2: 125, y2: 65 },
+                    { type: 'rect', x: 30, y: 65, w: 190, h: 35, text: "讀入 a,b,c" },
+                    { type: 'line', x1: 125, y1: 100, x2: 125, y2: 120 },
+                    { type: 'rect', x: 30, y: 120, w: 190, h: 35, text: "t = b*b - 4*a*c" },
+                    { type: 'line', x1: 125, y1: 155, x2: 125, y2: 175 },
+                    { type: 'rect', x: 30, y: 175, w: 190, h: 35, text: "t = sqrt(t)" },
+                    { type: 'line', x1: 125, y1: 210, x2: 125, y2: 230 },
+                    { type: 'rect', x: 30, y: 230, w: 190, h: 35, text: "x1 = (-b+t)/(2*a)" },
+                    { type: 'line', x1: 125, y1: 265, x2: 125, y2: 285 },
+                    { type: 'rect', x: 30, y: 285, w: 190, h: 35, text: "x2 = (-b-t)/(2*a)" },
+                    { type: 'line', x1: 125, y1: 320, x2: 125, y2: 340 },
+                    { type: 'rect', x: 30, y: 340, w: 190, h: 35, text: "印出 x1, x2" }
+                ])}
+                <h4>程式 1.3-4</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;math.h&gt; /* 需要引入 math.h 來使用 sqrt 函數 */
+
+int main(void)
+{
+    float a, b, c, t, x1, x2;
+    printf("Enter a: ");
+    scanf("%f", &a);
+    printf("Enter b: ");
+    scanf("%f", &b);
+    printf("Enter c: ");
+    scanf("%f", &c);
+
+    t = (b*b) - (4*a*c);
+    
+    if (t < 0) {
+        printf("Error: Roots are complex.\\n");
+        return 1;
+    }
+
+    t = sqrt(t);
+    x1 = (-b + t) / (2*a);
+    x2 = (-b - t) / (2*a);
+
+    printf("x1 = %f; x2 = %f\\n", x1, x2);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter a: 1
+Enter b: -3
+Enter c: 2
+x1 = 2.000000; x2 = 1.000000</div>
+            </section>
+            
+            <section id="ch1-exercise" class="content-section">
+                <h2>練習一與解答</h2>
+                <h4>1. 寫一程式，計算 (x+y)/(u+v)。</h4>
+                <p><b>流程圖：</b></p>
+                ${generateDiagram([
+                    { type: 'rect', x: 25, y: 20, w: 200, h: 35, text: "宣告 x,y,u,v,t1,t2,result" },
+                    { type: 'line', x1: 125, y1: 55, x2: 125, y2: 75 },
+                    { type: 'rect', x: 25, y: 75, w: 200, h: 35, text: "讀入 x,y,u,v" },
+                    { type: 'line', x1: 125, y1: 110, x2: 125, y2: 130 },
+                    { type: 'rect', x: 25, y: 130, w: 200, h: 35, text: "t1 = x+y" },
+                    { type: 'line', x1: 125, y1: 165, x2: 125, y2: 185 },
+                    { type: 'rect', x: 25, y: 185, w: 200, h: 35, text: "t2 = u+v" },
+                    { type: 'line', x1: 125, y1: 220, x2: 125, y2: 240 },
+                    { type: 'rect', x: 25, y: 240, w: 200, h: 35, text: "result = t1/t2" },
+                    { type: 'line', x1: 125, y1: 275, x2: 125, y2: 295 },
+                    { type: 'rect', x: 25, y: 295, w: 200, h: 35, text: "印出 result" }
+                ])}
+                <p><b>程式碼：</b></p>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(void){
+    float x,y,u,v,t1,t2,result;
+    
+    printf("Enter x: "); scanf("%f", &x);
+    printf("Enter y: "); scanf("%f", &y);
+    printf("Enter u: "); scanf("%f", &u);
+    printf("Enter v: "); scanf("%f", &v);
+
+    t1 = x + y;
+    t2 = u + v;
+    
+    if(t2 != 0) {
+        result = t1 / t2;
+        printf("result = %f\\n", result);
+    } else {
+        printf("Error: Division by zero!\\n");
+    }
+    
+    return 0;
+}</code></pre></div>
+            </section>
+        `;
+
+        // --- Core Functions ---
+        function generateTOC() {
+            const tocList = document.createElement('ul');
+            tableOfContents.forEach(item => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${item.id}`;
+                link.textContent = item.title;
+                if (item.isChapter) {
+                    listItem.classList.add('chapter');
+                }
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            tocContainer.appendChild(tocList);
+        }
+
+        function setActiveLink(sectionId) {
+             document.querySelectorAll('#toc a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${sectionId}`);
+            });
+        }
+
+        // --- Event Listeners ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        
+        tocContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Copy button functionality
+        contentArea.addEventListener('click', function(e) {
+            if (e.target.classList.contains('copy-button')) {
+                const wrapper = e.target.parentElement;
+                const codeElement = wrapper.querySelector('pre code');
+                const codeToCopy = codeElement.innerText;
+                
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    e.target.textContent = '已複製!';
+                    e.target.classList.add('copied');
+                    setTimeout(() => {
+                        e.target.textContent = '複製';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('無法複製程式碼: ', err);
+                    e.target.textContent = '複製失敗';
+                });
+            }
+        });
+        
+        // Intersection Observer for active link highlighting
+        const observer = new IntersectionObserver((entries) => {
+            let topEntry = null;
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                   topEntry = entry;
+                   break;
+                }
+            }
+            if (topEntry) {
+                setActiveLink(topEntry.target.id);
+            }
+        }, { rootMargin: "0% 0px -80% 0px", threshold: 0 });
+
+
+        // --- Initialization ---
+        function initialize() {
+            generateTOC();
+            document.getElementById('content-area').innerHTML = pageContent;
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+            Prism.highlightAll();
+            // Set initial active link
+             if(window.location.hash) {
+                setActiveLink(window.location.hash.substring(1));
+            } else {
+                setActiveLink(tableOfContents[0].id);
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

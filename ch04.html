@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第四章：有while迴圈指令的程式</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --header-color: #343a40;
+            --border-color: #dee2e6;
+            --sidebar-width: 300px;
+        }
+
+        /* General Body Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background-color: var(--header-color);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            white-space: nowrap; 
+            color: #ffffff;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .sidebar-nav-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .back-button {
+            display: block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #toc li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        #toc > ul > .chapter > a {
+            font-weight: 700;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        #toc li a:hover {
+            background-color: #e2e6ea;
+        }
+
+        #toc li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 5px solid #0056b3;
+            padding-left: 15px;
+        }
+        
+        #toc ul ul { /* Nested list for sections */
+            padding-left: 20px;
+            background-color: #fff;
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 1px 50px 50px 50px;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .content-section {
+            padding-top: 20px;
+            margin-top: -20px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5em;
+            margin-bottom: 1.2em;
+        }
+        h1 { font-size: 2.5em; margin-top: 1em; text-align: center; border-bottom-width: 3px;}
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; border-bottom: 1px dashed #ccc; }
+
+        p, ol, ul {
+            margin-bottom: 1.2em;
+        }
+
+        .diagram-container {
+            max-width: 100%;
+            margin: 25px auto;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+            box-sizing: border-box;
+        }
+        
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre[class*="language-"] {
+            border-radius: 8px;
+            padding: 1.5em !important;
+            margin: 0 !important;
+            line-height: 1.6;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 1;
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--primary-color);
+        }
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        /* Execution example style */
+        .execution-example {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-left: 5px solid #fd971f;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer Style */
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <h3>成為程式神不再只是夢想</h3>
+                <p>使用C語言</p>
+            </header>
+            <div class="sidebar-nav-actions">
+                <a href="index.html" class="back-button">返回主目錄</a>
+            </div>
+            <nav id="toc">
+                <!-- Table of Contents will be generated by JavaScript -->
+            </nav>
+        </aside>
+        <main class="content">
+            <div id="content-area">
+                 <!-- Content will be injected by JavaScript -->
+            </div>
+            <footer>
+                Copyright &copy; Liyuchiutiger Gongminshen
+            </footer>
+        </main>
+    </div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Elements ---
+        const tocContainer = document.getElementById('toc');
+        const contentArea = document.getElementById('content-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // --- Table of Contents Data ---
+        const tableOfContents = [
+            { id: 'ch4-title', title: '第四章：有while迴圈指令的程式', isChapter: true },
+            { id: 'ch4-sec1', title: '4.1 do while指令' },
+            { id: 'ch4-sec2', title: '4.2 while指令' },
+            { id: 'ch4-exercise', title: '練習四與解答' },
+        ];
+
+        // --- Dynamic SVG Generation ---
+        function generateDiagram(elements) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const PADDING = 20;
+            const svgElements = [];
+
+            const updateBounds = (x, y, w = 0, h = 0) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + w);
+                maxY = Math.max(maxY, y + h);
+            };
+            
+            elements.forEach(el => {
+                let svgString = '';
+                switch (el.type) {
+                    case 'rect':
+                        svgString = `<g><rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="4" ry="4" fill="#e3f2fd" stroke="#0d47a1" stroke-width="1.5" /><text x="${el.x + el.w / 2}" y="${el.y + el.h / 2}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.x, el.y, el.w, el.h);
+                        break;
+                    case 'diamond':
+                        const w2 = el.w / 2, h2 = el.h / 2;
+                        const points = `${el.cx},${el.cy - h2} ${el.cx + w2},${el.cy} ${el.cx},${el.cy + h2} ${el.cx - w2},${el.cy}`;
+                        svgString = `<g><polygon points="${points}" fill="#fffde7" stroke="#f57f17" stroke-width="1.5" /><text x="${el.cx}" y="${el.cy}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.cx - w2, el.cy - h2, el.w, el.h);
+                        break;
+                    case 'line':
+                        svgString = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)" />`;
+                        updateBounds(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x1-el.x2), Math.abs(el.y1-el.y2));
+                        break;
+                    case 'label':
+                        svgString = `<text x="${el.x}" y="${el.y}" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#555" text-anchor="middle">${el.text}</text>`;
+                        break;
+                }
+                svgElements.push(svgString);
+            });
+
+            const finalWidth = (maxX - minX) + 2 * PADDING;
+            const finalHeight = (maxY - minY) + 2 * PADDING;
+            const viewBox = `${minX - PADDING} ${minY - PADDING} ${finalWidth} ${finalHeight}`;
+            
+            const defs = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs>`;
+            
+            return `<div class="diagram-container"><svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${defs}${svgElements.join('')}</svg></div>`;
+        }
+
+        // --- Page Content Data ---
+        const pageContent = `
+            <section id="ch4-title" class="content-section">
+                <h1>第四章：有while迴圈指令的程式</h1>
+                <p>有很多的程式，雖然可以用for指令來寫，但是比較不方便，在這一章，我們要介紹while指令，有些程式，用while指令來寫，會比較容易。</p>
+                <p>while指令和for指令一樣，都是用來寫有迴圈的程式的。任何一個迴圈，都要有終止的條件，這個條件就在while之中。在for指令中，大多數情形，我們都用迴圈執行的次數來做終止條件，有了while指令，我們可以有比較奇怪的終止條件，比方說，我們可以用是否 x=y 來做為終止條件，當然也可以用是否 x＞a來做為終止條件。</p>
+                <p>while指令的終止條件，可以事先檢查也可以事後檢查，我們先介紹一個叫做do while的指令，這是屬於先斬後奏的指令，我們去執行指令，然後再檢查是否要繼續下去。</p>
+            </section>
+
+            <section id="ch4-sec1" class="content-section">
+                <h2>4.1 do while指令</h2>
+                <p>如前節所述，do while 是先斬後奏型，因此檢查是否要終止，乃是在一個迴圈結束以後再做的。</p>
+
+                <h3>例題4.1-1 求最大公約數</h3>
+                <p>以9和12為例，它們最大公約數是3。如何求兩個數的最大公約數呢？最簡單的方法就是用以下的演算法：</p>
+                 ${generateDiagram([
+                    { type: 'rect', x: 100, y: 10, w: 120, h: 35, text: '輸入 M和N' },
+                    { type: 'line', x1: 160, y1: 45, x2: 160, y2: 65 },
+                    { type: 'rect', x: 100, y: 65, w: 120, h: 35, text: 'x = M' },
+                    { type: 'line', x1: 160, y1: 100, x2: 160, y2: 120 },
+                    { type: 'rect', x: 100, y: 120, w: 120, h: 35, text: 'y = N' },
+                    { type: 'line', x1: 160, y1: 155, x2: 160, y2: 175, noArrow: true },
+                    { type: 'diamond', cx: 160, cy: 195, w: 100, h: 60, text: 'x > y' },
+                    { type: 'rect', x: 250, y: 177.5, w: 100, h: 35, text: 'x = x-y' },
+                    { type: 'line', x1: 210, y1: 195, x2: 250, y2: 195 },
+                    { type: 'label', x: 230, y: 185, text: 'Yes' },
+                    { type: 'line', x1: 300, y1: 212.5, x2: 300, y2: 300, noArrow: true },
+                    { type: 'line', x1: 160, y1: 225, x2: 160, y2: 245 },
+                    { type: 'label', x: 145, y: 240, text: 'No' },
+                    { type: 'diamond', cx: 160, cy: 275, w: 100, h: 60, text: 'x < y' },
+                    { type: 'rect', x: 250, y: 257.5, w: 100, h: 35, text: 'y = y-x' },
+                    { type: 'line', x1: 210, y1: 275, x2: 250, y2: 275 },
+                    { type: 'label', x: 230, y: 265, text: 'Yes' },
+                    { type: 'line', x1: 300, y1: 292.5, x2: 300, y2: 300, noArrow: true },
+                    { type: 'line', x1: 160, y1: 305, x2: 160, y2: 320, noArrow: true },
+                    { type: 'label', x: 145, y: 315, text: 'No' },
+                    { type: 'line', x1: 160, y1: 320, x2: 300, y2: 320 },
+                    { type: 'diamond', cx: 160, cy: 360, w: 100, h: 60, text: 'x != y' },
+                    { type: 'line', x1: 160, y1: 390, x2: 100, y2: 430 },
+                    { type: 'label', x: 120, y: 405, text: 'No' },
+                    { type: 'rect', x: 70, y: 430, w: 80, h: 35, text: '輸出 x' },
+                    { type: 'line', x1: 110, y1: 360, x2: 50, y2: 360, noArrow: true },
+                    { type: 'line', x1: 50, y1: 360, x2: 50, y2: 255, noArrow: true },
+                    { type: 'line', x1: 50, y1: 255, x2: 110, y2: 255 },
+                    { type: 'label', x: 80, y: 350, text: 'Yes' },
+                ])}
+                <h4>程式 4.1-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+int main(void)
+{
+    int M, N, x, y;
+    printf("Enter M: "); scanf("%d", &M);
+    printf("Enter N: "); scanf("%d", &N);
+    x = M;
+    y = N;
+    do
+    {
+        if(x > y) {
+            x = x - y;
+        } else if (y > x) {
+            y = y - x;
+        }
+    } while(x != y);
+    printf("x = %d\\n", x);
+    return 0;
+}</code></pre></div>
+                 <h4>執行範例</h4>
+                <div class="execution-example">Enter M: 18
+Enter N: 15
+x = 3</div>
+
+                <h3>例題4.1-2 尋找大於N的數字</h3>
+                <p>假設我們要從一些數字中，找到一個大於N的數字，我們可以一直不斷要求將數字一一輸入，直到有一個數字大於N為止。為了簡化問題起見，我們假設我們所輸入的數字中的確有大於N的數字。</p>
+                 ${generateDiagram([
+                    { type: 'rect', x: 100, y: 20, w: 100, h: 35, text: '輸入 N' },
+                    { type: 'line', x1: 150, y1: 55, x2: 150, y2: 75, noArrow: true },
+                    { type: 'rect', x: 100, y: 75, w: 100, h: 35, text: '輸入 x' },
+                    { type: 'line', x1: 150, y1: 110, x2: 150, y2: 130 },
+                    { type: 'diamond', cx: 150, cy: 165, w: 120, h: 70, text: 'x <= N' },
+                    { type: 'line', x1: 210, y1: 165, x2: 250, y2: 165 },
+                    { type: 'label', x: 230, y: 155, text: 'Yes' },
+                    { type: 'line', x1: 250, y1: 165, x2: 250, y2: 92.5, noArrow: true },
+                    { type: 'line', x1: 250, y1: 92.5, x2: 200, y2: 92.5 },
+                    { type: 'line', x1: 150, y1: 200, x2: 150, y2: 220 },
+                    { type: 'label', x: 135, y: 215, text: 'No' },
+                    { type: 'rect', x: 100, y: 220, w: 100, h: 35, text: '輸出 x' }
+                ])}
+                <h4>程式 4.1-2</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+int main(void)
+{
+    int x, N;
+    printf("Enter N: "); scanf("%d", &N);
+    do {
+        printf("Enter x: ");
+        scanf("%d", &x);
+    } while(x <= N);
+    printf("x = %d\\n", x);
+    return 0;
+}</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">Enter N: 5
+Enter x: 1
+Enter x: 2
+Enter x: 6
+x = 6</div>
+            </section>
+
+            <section id="ch4-sec2" class="content-section">
+                <h2>4.2 while指令</h2>
+                <p>單純的while指令，是在一開始去檢查終止條件的，這種做法，當然比較正確。我們可以從以下一些例子看出。</p>
+
+                <h3>例題4.2-1 讀入一連串的數字，但事先不知道數字的數目</h3>
+                <p>我們要讀入一連串的數字，每次讀入，就立刻列印。假如我們讀入的數字全是正數，我們可以將此特殊數字定成一個負數，讀到負數，就可終止。</p>
+                ${generateDiagram([
+                    { type: 'rect', x: 100, y: 20, w: 100, h: 35, text: '輸入 x' },
+                    { type: 'line', x1: 150, y1: 55, x2: 150, y2: 75 },
+                    { type: 'diamond', cx: 150, cy: 110, w: 120, h: 70, text: 'x >= 0' },
+                    { type: 'line', x1: 210, y1: 110, x2: 250, y2: 110 },
+                    { type: 'label', x: 230, y: 100, text: 'Yes' },
+                    { type: 'rect', x: 250, y: 92.5, w: 100, h: 35, text: '列印 x' },
+                    { type: 'line', x1: 300, y1: 127.5, x2: 300, y2: 150 },
+                    { type: 'rect', x: 250, y: 150, w: 100, h: 35, text: '輸入 x' },
+                    { type: 'line', x1: 300, y1: 185, x2: 300, y2: 210, noArrow: true },
+                    { type: 'line', x1: 150, y1: 210, x2: 300, y2: 210, noArrow: true },
+                    { type: 'line', x1: 150, y1: 210, x2: 150, y2: 145, noArrow: true },
+                    { type: 'line', x1: 150, y1: 145, x2: 60, y2: 145 },
+                    { type: 'label', x: 105, y: 145, text: 'No' },
+                    { type: 'rect', x: 20, y: 127.5, w: 80, h: 35, text: '終止' }
+                ])}
+                 <h4>程式 4.2-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+int main(void)
+{
+    int x;
+    printf("Enter x: ");
+    scanf("%d", &x);
+    while(x >= 0)
+    {
+        printf("x is larger than 0, x = %d\\n", x);
+        printf("Enter x: ");
+        scanf("%d", &x);
+    }
+    return 0;
+}</code></pre></div>
+                 <h4>執行範例</h4>
+                <div class="execution-example">Enter x: 5
+x is larger than 0, x = 5
+Enter x: 10
+x is larger than 0, x = 10
+Enter x: -1</div>
+            </section>
+            
+            <section id="ch4-exercise" class="content-section">
+                <h2>練習四與解答</h2>
+                <h4>1. 利用do while 寫一程式求 N 個數字的最大值。</h4>
+                ${generateDiagram([
+                    { type: 'rect', x: 100, y: 10, w: 120, h: 35, text: '讀入 N' },
+                    { type: 'line', x1: 160, y1: 45, x2: 160, y2: 65 },
+                    { type: 'rect', x: 100, y: 65, w: 120, h: 35, text: 'i = 1, MAX = 0' },
+                    { type: 'line', x1: 160, y1: 100, x2: 160, y2: 120, noArrow: true },
+                    { type: 'rect', x: 100, y: 120, w: 120, h: 35, text: '輸入 x' },
+                    { type: 'line', x1: 160, y1: 155, x2: 160, y2: 175 },
+                    { type: 'diamond', cx: 160, cy: 210, w: 100, h: 70, text: 'x > MAX' },
+                    { type: 'line', x1: 210, y1: 210, x2: 260, y2: 210 },
+                    { type: 'label', x: 235, y: 200, text: 'Yes' },
+                    { type: 'rect', x: 260, y: 192.5, w: 100, h: 35, text: 'MAX = x' },
+                    { type: 'line', x1: 310, y1: 227.5, x2: 310, y2: 265, noArrow: true },
+                    { type: 'line', x1: 160, y1: 245, x2: 160, y2: 265, noArrow: true },
+                    { type: 'line', x1: 160, y1: 265, x2: 310, y2: 265, noArrow: true },
+                    { type: 'line', x1: 235, y1: 265, x2: 235, y2: 285 },
+                    { type: 'rect', x: 185, y: 285, w: 100, h: 35, text: 'i = i + 1' },
+                    { type: 'line', x1: 235, y1: 320, x2: 235, y2: 340 },
+                    { type: 'diamond', cx: 235, cy: 375, w: 100, h: 70, text: 'i <= N' },
+                    { type: 'line', x1: 285, y1: 375, x2: 330, y2: 375, noArrow: true },
+                    { type: 'line', x1: 330, y1: 375, x2: 330, y2: 137.5, noArrow: true },
+                    { type: 'line', x1: 330, y1: 137.5, x2: 220, y2: 137.5 },
+                    { type: 'label', x: 250, y: 365, text: 'Yes' },
+                    { type: 'line', x1: 235, y1: 410, x2: 235, y2: 430 },
+                    { type: 'rect', x: 185, y: 430, w: 100, h: 35, text: '印出 MAX' }
+                ])}
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+int main(void) {
+    int i = 1, n, x, max = 0;
+    printf("請輸入數字總數 N: ");
+    scanf("%d", &n);
+    if (n > 0) {
+        do {
+            printf("請輸入第 %d 個數字: ", i);
+            scanf("%d", &x);
+            if (x > max) {
+                max = x;
+            }
+            i++;
+        } while (i <= n);
+    }
+    printf("最大值為: %d\\n", max);
+    return 0;
+}</code></pre></div>
+            </section>
+        `;
+
+        // --- Core Functions ---
+        function generateTOC() {
+            const tocList = document.createElement('ul');
+            tableOfContents.forEach(item => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${item.id}`;
+                link.textContent = item.title;
+                if (item.isChapter) {
+                    listItem.classList.add('chapter');
+                }
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            tocContainer.appendChild(tocList);
+        }
+
+        function setActiveLink(sectionId) {
+             document.querySelectorAll('#toc a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${sectionId}`);
+            });
+        }
+
+        // --- Event Listeners ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        
+        tocContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView();
+                }
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Copy button functionality
+        contentArea.addEventListener('click', function(e) {
+            if (e.target.classList.contains('copy-button')) {
+                const wrapper = e.target.parentElement;
+                const codeElement = wrapper.querySelector('pre code');
+                const codeToCopy = codeElement.innerText;
+                
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    e.target.textContent = '已複製!';
+                    e.target.classList.add('copied');
+                    setTimeout(() => {
+                        e.target.textContent = '複製';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('無法複製程式碼: ', err);
+                    e.target.textContent = '複製失敗';
+                });
+            }
+        });
+        
+        // Intersection Observer for active link highlighting
+        const observer = new IntersectionObserver((entries) => {
+            let topEntry = null;
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                   topEntry = entry;
+                   break;
+                }
+            }
+            if (topEntry) {
+                setActiveLink(topEntry.target.id);
+            }
+        }, { rootMargin: "0% 0px -80% 0px", threshold: 0 });
+
+
+        // --- Initialization ---
+        function initialize() {
+            generateTOC();
+            contentArea.innerHTML = pageContent;
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+            Prism.highlightAll();
+            if(window.location.hash) {
+                const id = window.location.hash.substring(1);
+                setActiveLink(id);
+                document.getElementById(id)?.scrollIntoView();
+            } else if (tableOfContents.length > 0) {
+                setActiveLink(tableOfContents[0].id);
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

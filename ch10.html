@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第十章：C語言Structure的功能</title>
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #f8f9fa;
+            --text-color: #212529;
+            --header-color: #343a40;
+            --border-color: #dee2e6;
+            --sidebar-width: 300px;
+        }
+
+        /* General Body Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #fff;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background-color: var(--header-color);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            white-space: nowrap; 
+            color: #ffffff;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .sidebar-nav-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .back-button {
+            display: block;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #toc ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #toc li a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+
+        #toc > ul > .chapter > a {
+            font-weight: 700;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        #toc li a:hover {
+            background-color: #e2e6ea;
+        }
+
+        #toc li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-left: 5px solid #0056b3;
+            padding-left: 15px;
+        }
+        
+        #toc ul ul { /* Nested list for sections */
+            padding-left: 20px;
+            background-color: #fff;
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 1px 50px 50px 50px;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .content-section {
+            padding-top: 20px;
+            margin-top: -20px;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 2.5em;
+            margin-bottom: 1.2em;
+        }
+        h1 { font-size: 2.5em; margin-top: 1em; text-align: center; border-bottom-width: 3px;}
+        h2 { font-size: 2em; }
+        h3 { font-size: 1.6em; }
+        h4 { font-size: 1.3em; border-bottom: 1px dashed #ccc; }
+
+        p, ol, ul {
+            margin-bottom: 1.2em;
+        }
+
+        .diagram-container {
+            max-width: 100%;
+            margin: 25px auto;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+            box-sizing: border-box;
+        }
+        
+        /* Code Blocks */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre[class*="language-"] {
+            border-radius: 8px;
+            padding: 1.5em !important;
+            margin: 0 !important;
+            line-height: 1.6;
+            font-size: 0.95em;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            z-index: 1;
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--primary-color);
+        }
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        /* Execution example style */
+        .execution-example {
+            background-color: #272822;
+            color: #f8f8f2;
+            border-left: 5px solid #fd971f;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Footer Style */
+        footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+            }
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <h3>成為程式神不再只是夢想</h3>
+                <p>使用C語言</p>
+            </header>
+            <div class="sidebar-nav-actions">
+                <a href="index.html" class="back-button">返回主目錄</a>
+            </div>
+            <nav id="toc">
+                <!-- Table of Contents will be generated by JavaScript -->
+            </nav>
+        </aside>
+        <main class="content">
+            <div id="content-area">
+                 <!-- Content will be injected by JavaScript -->
+            </div>
+            <footer>
+                Copyright &copy; Liyuchiutiger Gongminshen
+            </footer>
+        </main>
+    </div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- DOM Elements ---
+        const tocContainer = document.getElementById('toc');
+        const contentArea = document.getElementById('content-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // --- Table of Contents Data ---
+        const tableOfContents = [
+            { id: 'ch10-title', title: '第十章：C語言Structure的功能', isChapter: true },
+            { id: 'ch10-sec1', title: '10.1 讀取學生資料並排序' },
+            { id: 'ch10-sec2', title: '10.2 依學號尋找學生資料' },
+            { id: 'ch10-sec3', title: '10.3 求學生體重平均值' },
+            { id: 'ch10-sec4', title: '10.4 新增資料' },
+            { id: 'ch10-sec5', title: '10.5 刪減學生資料' },
+            { id: 'ch10-sec6', title: '10.6 以性別分類' },
+            { id: 'ch10-sec7', title: '10.7 列印串聯資料' },
+            { id: 'ch10-exercise', title: '練習十' },
+        ];
+
+        // --- Dynamic SVG Generation ---
+        function generateDiagram(elements) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const PADDING = 20;
+            const svgElements = [];
+
+            const updateBounds = (x, y, w = 0, h = 0) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x + w);
+                maxY = Math.max(maxY, y + h);
+            };
+            
+            elements.forEach(el => {
+                let svgString = '';
+                switch (el.type) {
+                    case 'rect':
+                        svgString = `<g><rect x="${el.x}" y="${el.y}" width="${el.w}" height="${el.h}" rx="4" ry="4" fill="#e3f2fd" stroke="#0d47a1" stroke-width="1.5" /><text x="${el.x + el.w / 2}" y="${el.y + el.h / 2}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.x, el.y, el.w, el.h);
+                        break;
+                    case 'diamond':
+                        const w2 = el.w / 2, h2 = el.h / 2;
+                        const points = `${el.cx},${el.cy - h2} ${el.cx + w2},${el.cy} ${el.cx},${el.cy + h2} ${el.cx - w2},${el.cy}`;
+                        svgString = `<g><polygon points="${points}" fill="#fffde7" stroke="#f57f17" stroke-width="1.5" /><text x="${el.cx}" y="${el.cy}" dominant-baseline="middle" text-anchor="middle" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#333">${el.text}</text></g>`;
+                        updateBounds(el.cx - w2, el.cy - h2, el.w, el.h);
+                        break;
+                    case 'line':
+                        svgString = `<line x1="${el.x1}" y1="${el.y1}" x2="${el.x2}" y2="${el.y2}" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)" />`;
+                        updateBounds(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x1-el.x2), Math.abs(el.y1-el.y2));
+                        break;
+                    case 'label':
+                        svgString = `<text x="${el.x}" y="${el.y}" font-family="'Noto Sans TC', sans-serif" font-size="14" fill="#555" text-anchor="middle">${el.text}</text>`;
+                        break;
+                }
+                svgElements.push(svgString);
+            });
+
+            const finalWidth = (maxX - minX) + 2 * PADDING;
+            const finalHeight = (maxY - minY) + 2 * PADDING;
+            const viewBox = `${minX - PADDING} ${minY - PADDING} ${finalWidth} ${finalHeight}`;
+            
+            const defs = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#333" /></marker></defs>`;
+            
+            return `<div class="diagram-container"><svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">${defs}${svgElements.join('')}</svg></div>`;
+        }
+
+        // --- Page Content Data ---
+        const pageContent = `
+            <section id="ch10-title" class="content-section">
+                <h1>第十章：C語言Structure的功能</h1>
+                <p>假設我們有一組學生的資料，包含學生的學號、姓名和體重，我們要如何表示這種資料呢？對很多電腦語言而言，我們必須要有三個陣列。這三個陣列分別表示學生的學號、姓名和體重。麻煩的是：這三個陣列是互有關聯的。如果我們要將學生的資料按照學號的大小排列，學號陣列當然會改變，但是我們必須跟著同時改變姓名陣列和體重陣列。改過以後的三個陣列如表10-3：</p>
+                <p>所以，我們只好承認這是一件很複雜的事情。可是，在 C 語言中，我們有一個簡單的辦法，我們可以利用一種叫做structure的功能，一下子就解決了這個問題。</p>
+                <p>Structure使我們可以宣告學生的資料有三個欄位：學號、姓名、體重。學號和體重都用整數來代表，姓名用文字來表示，所以我們可以作以下的宣告：</p>
+                <div class="code-block-wrapper"><pre><code class="language-c">struct student {
+    int idnum;
+    char name[20];
+    float weight;
+};</code></pre></div>
+                <p>從以上的宣告看來，學生的姓名最長不能超過20個英文字。一旦對student下定義，我們就宣告一個陣列有student的結構，這個陣列當然也要有一個名字，我們不妨將它叫做sdata。有了sdata以後，我們可以根據其中任何一個欄位排列。假設我們用學號排列，就可以得到以下的sdata。</p>
+            </section>
+            
+            <section id="ch10-sec1" class="content-section">
+                <h2>10.1 讀取學生資料並排序</h2>
+                <p>我們要讀入學生資料檔，根據學號將學生資料排列，並將結果輸出至另一檔案。</p>
+                <h4>程式 10-1</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+#define MAX_ARRAY_SIZE 256
+#define STUDENT_DATA_FILE_NAME "student.txt"
+#define OUTPUT_FILE_NAME "student_output.txt"
+
+struct student {
+    int idnum;
+    char name[20];
+    float weight;
+};
+
+// ... 副程式宣告 ...
+
+int main(void) {
+    FILE *student_data_fp, *output_data_fp;
+    struct student sdata[MAX_ARRAY_SIZE];
+    int num_of_student;
+
+    student_data_fp = fopen(STUDENT_DATA_FILE_NAME, "r");
+    output_data_fp = fopen(OUTPUT_FILE_NAME, "w");
+
+    if (student_data_fp != NULL) {
+        num_of_student = read_all_student_data(sdata, student_data_fp);
+        fclose(student_data_fp);
+
+        if (num_of_student > 0) {
+            sort_student_data(sdata, num_of_student);
+            output_all_student_data(output_data_fp, sdata, num_of_student);
+        }
+        fclose(output_data_fp);
+    } else {
+        printf("Cannot open student data file.\\n");
+    }
+    return 0;
+}
+
+// ... 副程式實作 (read_all_student_data, sort_student_data, etc.) ...
+</code></pre></div>
+                <h4>執行範例</h4>
+                <div class="execution-example">ID      Name    Weight
+109     John    79.1
+159     Peter   81.4
+163     Kelly   76.6
+200     Gloria  62.3
+201     Mary    60.3
+Start sorting student data.
+Sorted student data.
+ID      Name    Weight
+109     John    79.1
+159     Peter   81.4
+163     Kelly   76.6
+200     Gloria  62.3
+201     Mary    60.3
+</div>
+            </section>
+            
+            <section id="ch10-sec2" class="content-section">
+                <h2>10.2 依學號尋找學生資料</h2>
+                <p>此範例展示如何根據使用者輸入的學號，從檔案中讀取資料並尋找對應的學生。</p>
+                <h4>程式 10-2</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+// ... (struct definition and other defines) ...
+
+void search(struct student A[], int target_id_num, int N);
+// ... (other function prototypes) ...
+
+int main(void) {
+    // ... (file opening and data reading) ...
+    int target_id_num;
+
+    printf("Please enter the ID for searching the student: ");
+    scanf("%d", &target_id_num);
+    
+    // ... (read data into sdata) ...
+    
+    search(sdata, target_id_num, num_of_student);
+    
+    return 0;
+}
+
+void search(struct student A[], int target_id_num, int N) {
+    int i;
+    int test = 0; // 0 for not found, 1 for found
+    for (i = 0; i < N; i++) {
+        if (A[i].idnum == target_id_num) {
+            test = 1;
+            printf("\\nData Found.\\n");
+            // display_student_data(A, i); // function to print one student
+            break;
+        }
+    }
+    if (test == 0) {
+        printf("\\nData Not Found.\\n");
+    }
+}
+</code></pre></div>
+            </section>
+            
+            <section id="ch10-sec3" class="content-section">
+                <h2>10.3 求學生體重平均值</h2>
+                <p>此範例計算所有學生體重的平均值。</p>
+                <h4>程式 10-3</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+// ... (struct definition and other defines) ...
+
+void ave(struct student A[], int N);
+// ... (other function prototypes) ...
+
+int main(void) {
+    // ... (file opening and data reading into sdata) ...
+    
+    ave(sdata, num_of_student);
+
+    return 0;
+}
+
+void ave(struct student A[], int N) {
+    int i;
+    float sum = 0.0;
+    if (N == 0) return;
+    for (i = 0; i < N; i++) {
+        sum += A[i].weight;
+    }
+    printf("The average weight is %.1f\\n", sum / N);
+}
+</code></pre></div>
+            </section>
+            
+            <section id="ch10-sec4" class="content-section">
+                <h2>10.4 新增資料</h2>
+                <p>此範例展示如何安全地新增一筆學生資料到檔案中，並檢查學號是否重複。</p>
+                <h4>程式 10-4</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+// ... (struct definition and function prototypes) ...
+
+int main(void) {
+    // ... (file opening and data reading into sdata) ...
+    struct student new_student;
+
+    printf("Please enter new student data (ID Name Weight):\\n");
+    scanf("%d %s %f", &new_student.idnum, new_student.name, &new_student.weight);
+
+    // check() would return 1 if not exists, 0 if exists
+    if (check(sdata, num_of_student, new_student) == 1) {
+        // add_new_student_to_file() appends the new student to the file
+        printf("Student added successfully.\\n");
+    } else {
+        printf("Student with this ID already exists.\\n");
+    }
+
+    return 0;
+}
+</code></pre></div>
+            </section>
+            
+            <section id="ch10-sec5" class="content-section">
+                <h2>10.5 刪減學生資料</h2>
+                <p>此範例展示如何根據學號刪除一筆學生資料。基本做法是將所有資料讀入記憶體，然後將除了要刪除的資料以外的所有資料重新寫回檔案。</p>
+                <h4>程式 10-5</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+// ... (struct definition and function prototypes) ...
+
+void delete_student_data(int id, int num_of_student, struct student A[], FILE *fp);
+
+int main(void) {
+    // ... (file opening and data reading into sdata) ...
+    int id_to_delete;
+
+    printf("Please enter the ID to delete: ");
+    scanf("%d", &id_to_delete);
+    
+    FILE *fp_write = fopen(STUDENT_DATA_FILE_NAME, "w"); // Open in write mode to overwrite
+    if (fp_write != NULL) {
+        delete_student_data(id_to_delete, num_of_student, sdata, fp_write);
+        fclose(fp_write);
+        printf("Operation completed.\\n");
+    }
+    
+    return 0;
+}
+
+void delete_student_data(int id, int num, struct student A[], FILE *fp) {
+    for (int i = 0; i < num; i++) {
+        if (A[i].idnum != id) {
+            fprintf(fp, "%d %s %.1f\\n", A[i].idnum, A[i].name, A[i].weight);
+        }
+    }
+}
+</code></pre></div>
+            </section>
+
+            <section id="ch10-sec6" class="content-section">
+                <h2>10.6 以性別分類</h2>
+                <p>此範例展示一個更進階的應用：使用結構中的一個欄位（reference）來建立一個連結串列（Linked List），將相同性別的學生串接起來，以便快速查找。</p>
+                <h4>程式 10-6</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+// ... (struct with sex and reference fields) ...
+
+void link_students(struct student A[], int num, int headarray[]);
+
+int main(void) {
+    // ... (read data into sdata) ...
+    int headarray[3] = {0}; // headarray[1] for female, [2] for male
+
+    link_students(sdata, num_of_student, headarray);
+
+    // ... (now you can traverse the lists starting from headarray indices) ...
+    
+    return 0;
+}
+</code></pre></div>
+            </section>
+
+            <section id="ch10-sec7" class="content-section">
+                <h2>10.7 列印串聯資料</h2>
+                <p>承接上一範例，此程式展示如何走訪已建立好的連結串列，並印出所有屬於特定性別的學生資料。</p>
+                <h4>程式 10-7</h4>
+                <div class="code-block-wrapper"><button class="copy-button">複製</button><pre><code class="language-c">#include &lt;stdio.h&gt;
+// ... (struct and function prototypes) ...
+
+void output_link(struct student A[], char s, int headarray[]);
+
+int main(void) {
+    // ... (read data and link students as in 10.6) ...
+
+    printf("--- Male Students ---\\n");
+    output_link(sdata, 'M', headarray);
+
+    printf("\\n--- Female Students ---\\n");
+    output_link(sdata, 'F', headarray);
+
+    return 0;
+}
+
+void output_link(struct student A[], char s, int headarray[]) {
+    int i;
+    if (s == 'M') {
+        i = headarray[2];
+    } else {
+        i = headarray[1];
+    }
+
+    while (i != 0) { // Assuming 0 or -1 is the end of list marker
+        // display_student_data(A, i);
+        i = A[i].reference;
+    }
+}
+</code></pre></div>
+            </section>
+            
+            <section id="ch10-exercise" class="content-section">
+                <h2>練習十</h2>
+                <ol>
+                    <li>假設我們有一種有關貨物的資料，每一項貨物有一號碼以及價格。寫一程式，從某檔案中輸入十筆貨物資料。再將此資料按號碼排列。</li>
+                    <li>假設資料已有按號碼排列，寫一程式，輸入一號碼，作一搜尋，如此號碼存在，列印此筆資料。否則，列印找不到資料。</li>
+                    <li>寫一程式，輸入一數字，將所有價格大於或等於x的貨物聯結起來，也將價格小於x的貨物聯結起來。</li>
+                    <li>假設已將聯結完成，寫一程式，輸入一數字1或2。數字1代表要印出所有價格大於或等於x的貨物，數字2代表要印出所有價格小於x的貨物。</li>
+                </ol>
+            </section>
+        `;
+
+        // --- Core Functions ---
+        function generateTOC() {
+            const tocList = document.createElement('ul');
+            tableOfContents.forEach(item => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#${item.id}`;
+                link.textContent = item.title;
+                if (item.isChapter) {
+                    listItem.classList.add('chapter');
+                }
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
+            tocContainer.appendChild(tocList);
+        }
+
+        function setActiveLink(sectionId) {
+             document.querySelectorAll('#toc a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === `#${sectionId}`);
+            });
+        }
+
+        // --- Event Listeners ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        
+        tocContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView();
+                }
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('open');
+                }
+            }
+        });
+
+        // Copy button functionality
+        contentArea.addEventListener('click', function(e) {
+            if (e.target.classList.contains('copy-button')) {
+                const wrapper = e.target.parentElement;
+                const codeElement = wrapper.querySelector('pre code');
+                const codeToCopy = codeElement.innerText;
+                
+                navigator.clipboard.writeText(codeToCopy).then(() => {
+                    e.target.textContent = '已複製!';
+                    e.target.classList.add('copied');
+                    setTimeout(() => {
+                        e.target.textContent = '複製';
+                        e.target.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('無法複製程式碼: ', err);
+                    e.target.textContent = '複製失敗';
+                });
+            }
+        });
+        
+        // Intersection Observer for active link highlighting
+        const observer = new IntersectionObserver((entries) => {
+            let topEntry = null;
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                   topEntry = entry;
+                   break;
+                }
+            }
+            if (topEntry) {
+                setActiveLink(topEntry.target.id);
+            }
+        }, { rootMargin: "0% 0px -80% 0px", threshold: 0 });
+
+
+        // --- Initialization ---
+        function initialize() {
+            generateTOC();
+            contentArea.innerHTML = pageContent;
+            document.querySelectorAll('.content-section').forEach(section => {
+                observer.observe(section);
+            });
+            Prism.highlightAll();
+            if(window.location.hash) {
+                const id = window.location.hash.substring(1);
+                setActiveLink(id);
+                document.getElementById(id)?.scrollIntoView();
+            } else if (tableOfContents.length > 0) {
+                setActiveLink(tableOfContents[0].id);
+            }
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>
